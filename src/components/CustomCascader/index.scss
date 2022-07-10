@@ -1,0 +1,9 @@
+.custom-cascader-popper {
+  .el-cascader-node > .el-radio {
+    display: none;
+  }
+}
+
+.custom-cascader.el-cascader {
+  display: block;
+}

@@ -1,0 +1,219 @@
+.ml-table {
+  // padding: 0 8px;
+  overflow: hidden;
+
+  .ml-table-empty {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+
+    &-img {
+      display: block;
+      width: 160px;
+      margin: 0 auto 10px;
+    }
+  }
+
+  .outer-btn-box {
+    margin-bottom: 16px;
+  }
+
+  .el-table {
+    width: 100%;
+
+    .cell {
+      .td-text {
+        // @include text-overflow();
+        // overflow: hidden; //超出的文本隐藏
+        // text-overflow: ellipsis; //溢出用省略号显示
+        // white-space: nowrap; //溢出不换行
+        line-height: 20px;
+      }
+
+      .td-img-box {
+        display: flex;
+        align-items: center;
+      }
+
+      .td-img {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-left: 4px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+
+        .el-icon-circle-close {
+          color: #fff;
+        }
+      }
+
+      .success,
+      .error,
+      .warning,
+      .done,
+      .failed {
+        &::before {
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          margin: 0 4px 2px 0;
+          content: "";
+          border-radius: 50%;
+        }
+      }
+
+      .success::before {
+        background-color: #19cc96;
+      }
+
+      .error::before {
+        background-color: #ff5b63;
+      }
+
+      .warning::before {
+        background-color: #ff8f33;
+      }
+
+      .done::before {
+        background-color: #3786fd;
+      }
+
+      .failed::before {
+        background-color: #c0c0c0;
+      }
+    }
+
+    thead th {
+      position: relative; //loading层级问题
+      font-weight: 500;
+      color: #333;
+      background-color: #fafafa;
+    }
+  }
+
+  .el-table__empty-block {
+    width: 100% !important;
+  }
+}
+
+// 因为优先级的问题。放在外层来
+.ml-table-pagination {
+  padding: 0;
+  margin-top: 10px;
+  font-weight: normal;
+  text-align: right;
+
+  &.is-background {
+    .btn-next,
+    .btn-prev,
+    .el-pager li {
+      min-width: 32px;
+      height: 32px;
+      line-height: 32px;
+      background: none;
+      border: 1px solid #d9d9d9;
+
+      &.active {
+        border: 0;
+      }
+    }
+
+    .el-pagination__jump,
+    .el-pagination__total {
+      height: 32px;
+      font-size: 12px;
+      line-height: 32px;
+      color: #666;
+    }
+
+    .el-input__inner {
+      height: 32px;
+      font-size: 12px;
+      line-height: 32px;
+      color: #666;
+    }
+
+    .el-pagination__sizes .el-input__inner {
+      padding-left: 12px;
+      text-align: left;
+    }
+  }
+}
+
+.ml-table-search {
+  position: relative;
+  margin: 0 -15px;
+
+  .ml-form {
+    flex: 1;
+  }
+
+  .ml-form-item-box {
+    flex-shrink: 0;
+  }
+
+  &.hide-more {
+    .ml-form {
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  .search-btn-box {
+    padding-right: 15px;
+    margin-left: auto;
+    text-align: right;
+
+    .arrow {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
+  }
+
+  > .search-btn-box {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  &.search-label-top {
+    .search-btn-box {
+      margin-top: 22px;
+    }
+  }
+
+  &:not(.hide-more).aloneLineBtn {
+    .search-btn-box {
+      margin-top: 0;
+      margin-bottom: 18px;
+    }
+  }
+
+  @for $i from 1 to 5 {
+    &.hide-more.hide-index-#{$i} {
+      .ml-form-item-box:nth-child(#{$i}) {
+        visibility: hidden;
+      }
+    }
+
+    // .paper:nth-child(#{$i}) {
+    //   /**
+    //     有顺序之分
+    //     transform: translate() rotate() !== transform: rotate() translate()
+    //     */
+    //   transform: translate(-50%, -40%) rotate(#{$i}5deg);
+    // }
+  }
+
+  &.btn-in-form {
+    .ml-form {
+      .search-btn-box {
+        margin-left: 15px;
+      }
+    }
+  }
+}

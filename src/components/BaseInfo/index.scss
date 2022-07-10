@@ -1,0 +1,81 @@
+// 单行文本溢出显示省略号
+// -----------------------------------------------------------------------------
+@mixin ell($align: inherit) {
+  overflow: hidden;
+  text-align: $align;
+  text-overflow: ellipsis;
+  word-wrap: normal;
+  white-space: nowrap;
+}
+// 多行文本溢出显示省略号
+@mixin ells($line: 2, $line-height: 19px) {
+  display: -webkit-box;
+  max-height: $line-height * $line + 10px;
+  overflow: hidden;
+  line-height: $line-height;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+}
+
+.ml-info {
+  .ml-info-title {
+    padding: 15px 0 8px 0;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .ml-info-content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .ml-info-label {
+    flex: none;
+  }
+
+  .ml-info-value {
+    flex: 1;
+    margin-right: 8px;
+    overflow: hidden;
+    color: #666;
+
+    .td-img {
+      width: 80px;
+      height: 80px;
+      margin-right: 10px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .ml-info-item {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    color: rgba(0, 0, 0, 0.85);
+
+    &.ml-info-ell {
+      .ml-info-value {
+        @include ell();
+      }
+    }
+
+    &.ml-info-ells {
+      .ml-info-value {
+        display: -webkit-box;
+        // max-height: $line-height * $line + 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-all;
+        // -webkit-line-clamp: $line;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+}

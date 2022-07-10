@@ -1,0 +1,21 @@
+.global-video-player {
+  position: fixed;
+  top: 155px;
+  right: 24px;
+  z-index: 500;
+
+  .player-box {
+    position: relative;
+    width: 345px;
+    height: 190px;
+
+    .el-dialog__headerbtn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      padding: 5px;
+      color: #fff;
+      background: none;
+    }
+  }
+}
