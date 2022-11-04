@@ -17,6 +17,7 @@ export default defineComponent({
     rootValue: { type: null, required: true },
     rootConfig: { type: Object as PropType<MlFormConfig>, required: true },
   },
+  emits: { input: (value: AnyObj) => null },
   data() {
     const config_: MlFormColumn = undefined;
     return {

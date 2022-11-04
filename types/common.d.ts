@@ -11,7 +11,7 @@
  * @Description:  配置的定义
  */
 
-export interface MlOptions<O = AnyObj> {
+interface MlOptions<O = AnyObj> {
   /** 下拉，单选多选等数据的选项 */
   options?: Array<O>;
 
@@ -35,15 +35,11 @@ export interface MlOptions<O = AnyObj> {
 }
 
 /** 任意json对象 */
-export interface AnyObj {
+interface AnyObj {
   [key: string]: any;
 }
 
-/** 转发所有属性为可选 */
-export type Partial<T> = {
-  [P in keyof T]?: T[P];
-};
-
+type InferArray<T> = T extends (infer U)[] ? U : never;
 // export default {
 //   MlForm,
 //   install(vue: typeof Vue, options?: AnyObj): void;

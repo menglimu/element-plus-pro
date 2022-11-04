@@ -6,9 +6,8 @@
  * @Description:  只保留form中的公共方法
  */
 import { getJudge, isNull } from "@/utils";
-import { MlOptions } from "types/common";
-import { MlTableColumn, MlTableConfig } from "types/table";
-import { CreateElement } from "vue/types/umd";
+import { BaseTableProps, MlTableColumn, MlTableConfig } from "types/table";
+import { watch } from "vue";
 
 // 获取树形的值
 function getTreeLabel(
@@ -36,9 +35,9 @@ function getTreeLabel(
  * @return: 转换后的文本，可能含有标签的字符串
  */
 export function formatterFormValue<D>(
-  cellValue: string | number | Array<string | number>,
+  cellValue: string | Array<string | number>,
   config: MlOptions & { type?: string }
-): string | number {
+): string {
   let label = cellValue;
   if (config.type === "select") {
     const valueArr = Array.isArray(cellValue) ? cellValue : [cellValue];
@@ -55,10 +54,9 @@ export function formatterFormValue<D>(
  */
 // eslint-disable-next-line max-params
 export function getImage(
-  preList: string | [string],
-  column?: { baseUrl?: string; noPre?: boolean },
-  className?: string,
-  h?: CreateElement
+  preList: string | string[],
+  column: { baseUrl?: string; noPre?: boolean },
+  className?: string | string[]
 ) {
   let preList_: string[];
   if (!Array.isArray(preList)) {
@@ -89,12 +87,12 @@ export function getImage(
  * @return:
  */
 
-interface RowParams<D> {
-  row: any;
-  column: MlTableColumn<D>;
-}
-
-function getStatusNames(className: string[], statusJudge: AnyObj, row: AnyObj) {
+function getStatusNames(
+  className: string[],
+  statusJudge: InferArray<BaseTableProps["config"]["columns"]>["statusJudge"],
+  row: AnyObj
+) {
+  if (!statusJudge) return className;
   if (typeof statusJudge === "function") {
     return statusJudge(row);
   }
@@ -104,25 +102,26 @@ function getStatusNames(className: string[], statusJudge: AnyObj, row: AnyObj) {
   return className;
 }
 
-function getBaseRender<D>(column: MlTableColumn<D>) {
+function getBaseRender(column: MlTableColumn): InferArray<BaseTableProps["config"]["columns"]>["render"] {
+  if (column.prop === undefined) return;
   if (column.type === "image") {
-    return (h: CreateElement, params: RowParams<D>) => {
-      let preList = params.row[column.prop];
+    return (params) => {
+      let preList = params.row[column.prop!];
       const className = getStatusNames(["td-img-box"], column.statusJudge, params.row);
 
       if (preList) {
-        return getImage(preList, column, className, h);
+        return getImage(preList, column, className);
       } else {
         return <span></span>;
       }
     };
   } else if (column.type === "svg") {
-    return (h: CreateElement, params: RowParams<D>) => {
-      if (params.row[column.prop]) {
+    return (params) => {
+      if (params.row[column.prop!]) {
         const className = getStatusNames(["td-svg-box"], column.statusJudge, params.row);
         return (
           <div class={className}>
-            <svg-icon class="td-svg" icon-class={params.row[column.prop]} />
+            <svg-icon class="td-svg" icon-class={params.row[column.prop!]} />
           </div>
         );
       } else {
@@ -130,21 +129,24 @@ function getBaseRender<D>(column: MlTableColumn<D>) {
       }
     };
   } else {
-    return (h: CreateElement, params: RowParams<D>) => {
+    return (params) => {
       const className = getStatusNames(["td-text"], column.statusJudge, params.row);
 
       if (column.formatter) {
-        return <div class={className}>{column.formatter(params.row, column as any)}</div>;
+        return (
+          <div class={className}>
+            {column.formatter(params.row, column as any, params.row[params.column.prop!], params.$index)}
+          </div>
+        );
       }
-      return (
-        <span class={className} domPropsInnerHTML={formatterFormValue(params.row[column.prop], params.column)}></span>
-      );
+      return <span class={className} innerHTML={formatterFormValue(params.row[column.prop!], params.column)}></span>;
     };
   }
 }
 
-export function columnsHandler(config: MlTableConfig<any, any>) {
-  config.columns.forEach((column) => {
+function handleConfig(props: BaseTableProps) {
+  const columns = props.config.columns;
+  columns.forEach((column) => {
     if (typeof column.optionsGet === "function") {
       column.options = [];
       column.optionsGet().then((res) => {
@@ -160,4 +162,10 @@ export function columnsHandler(config: MlTableConfig<any, any>) {
       column.render = getBaseRender(column);
     }
   });
+}
+
+export default function useConfig(props: BaseTableProps) {
+  watch([props.config], () => handleConfig(props), { immediate: true });
+
+  return props.config;
 }
