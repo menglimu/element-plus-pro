@@ -1,10 +1,12 @@
+import { ElTable } from "element-plus";
 import { Table } from "element-plus/es/components/table/src/table/defaults";
 import { BaseTableProps, ResponseData } from "types/table";
 import { onMounted, ref, UnwrapNestedRefs, VNode } from "vue";
 import useConfig from "./config";
 import useOuterBtn from "./outerBtn";
 import usePagination from "./pagination";
-import useTable from "./table";
+// import useTable from "./table";
+import TableBox from "./table";
 
 /**
  * @Author: wenlin
@@ -12,14 +14,13 @@ import useTable from "./table";
  */
 
 export default functionComponent<BaseTableProps>(function BaseTable(props) {
-  let data = $ref<AnyObj[]>([]);
+  let data = ref<AnyObj[]>([]);
   let loading = $ref(false);
   let searchInput = $ref({});
-  console.log($$(data));
 
-  const { table, multipleSelection, renderTable } = useTable(props, $$(data), refresh);
+  // const { table, multipleSelection, renderTable } = useTable(props, data, refresh);
   let { pageSize, currentPage, total, renderPagination } = $(usePagination(props, search));
-  const renderOuerBtn = useOuterBtn(props, $$(data), multipleSelection, refresh);
+  const renderOuerBtn = useOuterBtn(props, data, [], refresh);
 
   //       defaultOptions: null as MlTableDefaultOptions,
   //       // 表格组件默认配置项
@@ -84,19 +85,19 @@ export default functionComponent<BaseTableProps>(function BaseTable(props) {
   // }
 
   // 搜索
-  async function search(type = "", data: AnyObj = {}) {
+  async function search(type = "", param: AnyObj = {}) {
     if (!props.api?.list) {
       return;
     }
     // expand-row-keys
     loading = true;
-    data = [];
+    data.value = [];
     const pager = props.paginationConfig !== false ? { pageSize: pageSize, pageNum: currentPage } : {};
     let params = {
       ...pager,
       ...props.params,
       ...searchInput,
-      ...data,
+      ...param,
     };
 
     if (props.beforeGetList) {
@@ -106,8 +107,8 @@ export default functionComponent<BaseTableProps>(function BaseTable(props) {
     try {
       res = await props.api.list(params);
       total = Number(res.total) || 0;
-      data = res?.content || [];
-      if (data.length === 0 && currentPage > (Math.ceil(total / pageSize) || 1)) {
+      data.value = res?.content || [];
+      if (data.value.length === 0 && currentPage > (Math.ceil(total / pageSize) || 1)) {
         currentPage = 1;
         search("errorPage-reset");
       }
@@ -150,13 +151,26 @@ export default functionComponent<BaseTableProps>(function BaseTable(props) {
 
   //   );
   // }
+  onMounted(() => {
+    // console.log(table.value);
+  });
+  let aaaa = $ref(1);
   return () => (
-    <div class="ml-table">
+    <div
+      class="ml-table"
+      onClick={() => {
+        aaaa++;
+        // console.log(table.value);
+      }}
+    >
+      {aaaa}
       {/* {renderSearch()} */}
       {renderOuerBtn()}
       {/* {$slots.default} */}
       {/* {$scopedSlots.table ? $scopedSlots.table({ data: data, columns: config_.columns }) : renderTable(h)} */}
-      {renderTable()}
+      {/* {renderTable?.value} */}
+      <TableBox props={props} data={data} refresh={refresh} />
+      <ElTable>{console.log(2234353)}</ElTable>
       {renderPagination()}
     </div>
   );

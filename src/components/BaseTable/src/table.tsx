@@ -2,7 +2,7 @@ import { getIcon, getJudge } from "@/utils";
 import { ElButton, ElTable, ElTableColumn, useForwardRef } from "element-plus";
 import { Table } from "element-plus/es/components/table/src/table/defaults";
 import { BaseTableProps, MlTableConfig, MlTableInnerBtn } from "types/table";
-import { Ref, ref } from "vue";
+import { effect, onMounted, Ref, ref, VNode } from "vue";
 import useConfig from "./config";
 import { onDelete } from "./outerBtn";
 
@@ -40,9 +40,116 @@ const columnDefaultControl = {
   fixed: "right",
 };
 
-export default function useTable(props: BaseTableProps, data: Ref<AnyObj[]>, refresh: () => void) {
+// export default function useTable(props: BaseTableProps, data: Ref<AnyObj[]>, refresh: () => void) {
+//   const config_ = useConfig(props);
+//   const table = ref<Table<AnyObj>>();
+//   const node = ref<VNode>();
+
+//   let multipleSelection = $ref<AnyObj[]>([]);
+
+//   // 表格内部按钮点击处理
+//   function handleInnerBtn(row: AnyObj, btn: MlTableInnerBtn) {
+//     switch (btn.evtType) {
+//       case "mldelete":
+//         return onDelete([row], props, refresh);
+//       default:
+//         return btn?.callback?.(row);
+//     }
+//   }
+
+//   function renderInnerBtn() {
+//     if (!props.innerBtn?.length) {
+//       return;
+//     }
+//     return (
+//       <ElTableColumn {...{ props: columnDefaultControl }} width={props.config.tableOptWidth}>
+//         {{
+//           default: (scope: any) =>
+//             props.innerBtn
+//               ?.filter((btn) => showJudgeInner(btn, scope.row))
+//               .map((btn, index) => {
+//                 if (btn.render) {
+//                   return btn.render(scope);
+//                 }
+//                 return (
+//                   //     <!-- <el-tooltip v-for="(btn, index) in innerBtnGroup" :key="index" :content="btn.name" effect="dark" placement="top"> -->
+//                   <ElButton key={index} {...btn} class="inner-btn" onClick={() => handleInnerBtn(scope.row, btn)}>
+//                     {getIcon(btn.icon)}
+//                     {btn.name}
+//                   </ElButton>
+//                 );
+//               }),
+//         }}
+//       </ElTableColumn>
+//     );
+//   }
+
+//   effect(() => {
+//     node.value = renderTable();
+//   });
+
+//   // 获取选择的项
+//   function handleSelectionChange(val: AnyObj[]) {
+//     multipleSelection = val;
+//   }
+
+//   function renderColumn() {
+//     return config_.columns.map((item, index) => {
+//       if (item.showJudge === false) {
+//         return null;
+//       }
+//       if (typeof item.showJudge === "function" && item.showJudge() === false) {
+//         return null;
+//       }
+//       if (item.type === "index" || item.type === "selection") {
+//         return <ElTableColumn align="center" {...item} />;
+//       }
+//       if (item.renderColumn) {
+//         return item.renderColumn();
+//       }
+//       return (
+//         <ElTableColumn key={item.key || item.prop || index} {...{ ...columnDefaultNormal, ...item }}>
+//           {{
+//             default: (scope: any) =>
+//               item.render ? item.render(scope) : <span class="td-text">{item.prop ? scope.row[item.prop] : null}</span>,
+//           }}
+//         </ElTableColumn>
+//       );
+//     });
+//   }
+//   console.log(table.value);
+
+//   //   <!-- 表格内容 -->
+//   function renderTable() {
+//     console.count("table");
+//     console.log(table.value);
+
+//     return (
+//       <ElTable ref={(el: any) => (table.value = el)} {...config_} data={data.value}>
+//         {config_.selection && (
+//           <ElTableColumn {...columnDefaultSelection} reserve-selection={config_.reserveSelection} />
+//         )}
+//         {config_.index && <ElTableColumn {...columnDefaultIndex} />}
+//         {renderColumn()}
+//         {renderInnerBtn()}
+//         {/* {renderTableSlot()} */}
+//       </ElTable>
+//     );
+//   }
+//   return {
+//     table,
+//     multipleSelection,
+//     renderTable: node,
+//   };
+// }
+
+export default functionComponent<{ props: BaseTableProps; data: Ref<AnyObj[]>; refresh: () => void }>(function TableBox(
+  props_
+) {
+  const { props, data, refresh } = $(props_);
   const config_ = useConfig(props);
   const table = ref<Table<AnyObj>>();
+  const node = ref<VNode>();
 
   let multipleSelection = $ref<AnyObj[]>([]);
 
@@ -112,25 +219,26 @@ export default function useTable(props: BaseTableProps, data: Ref<AnyObj[]>, ref
       );
     });
   }
-  console.log(data.value);
+  onMounted(() => {
+    console.log(111, table.value);
+  });
 
   //   <!-- 表格内容 -->
-  function renderTable() {
+  return function renderTable() {
+    console.count("table");
+
     return (
-      <ElTable ref={table} {...config_} data={data.value}>
+      <ElTable border ref={(el: any) => (table.value = el)} {...config_} data={data}>
+        {console.log(1111111111111111111)}
         {config_.selection && (
           <ElTableColumn {...columnDefaultSelection} reserve-selection={config_.reserveSelection} />
         )}
+
         {config_.index && <ElTableColumn {...columnDefaultIndex} />}
         {renderColumn()}
         {renderInnerBtn()}
         {/* {renderTableSlot()} */}
       </ElTable>
     );
-  }
-  return {
-    table,
-    multipleSelection,
-    renderTable,
   };
-}
+});

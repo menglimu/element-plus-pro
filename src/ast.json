@@ -1,0 +1,466 @@
+{
+  "type": "File",
+  "start": 0,
+  "end": 280,
+  "loc": { "start": { "line": 1, "column": 0, "index": 0 }, "end": { "line": 11, "column": 0, "index": 280 } },
+  "errors": [],
+  "program": {
+    "type": "Program",
+    "start": 0,
+    "end": 280,
+    "loc": { "start": { "line": 1, "column": 0, "index": 0 }, "end": { "line": 11, "column": 0, "index": 280 } },
+    "sourceType": "module",
+    "interpreter": null,
+    "body": [
+      {
+        "type": "ImportDeclaration",
+        "start": 0,
+        "end": 42,
+        "loc": { "start": { "line": 1, "column": 0, "index": 0 }, "end": { "line": 1, "column": 42, "index": 42 } },
+        "importKind": "value",
+        "specifiers": [
+          {
+            "type": "ImportSpecifier",
+            "start": 9,
+            "end": 21,
+            "loc": { "start": { "line": 1, "column": 9, "index": 9 }, "end": { "line": 1, "column": 21, "index": 21 } },
+            "imported": {
+              "type": "Identifier",
+              "start": 9,
+              "end": 21,
+              "loc": {
+                "start": { "line": 1, "column": 9, "index": 9 },
+                "end": { "line": 1, "column": 21, "index": 21 },
+                "identifierName": "MlFormConfig"
+              },
+              "name": "MlFormConfig"
+            },
+            "importKind": "value",
+            "local": {
+              "type": "Identifier",
+              "start": 9,
+              "end": 21,
+              "loc": {
+                "start": { "line": 1, "column": 9, "index": 9 },
+                "end": { "line": 1, "column": 21, "index": 21 },
+                "identifierName": "MlFormConfig"
+              },
+              "name": "MlFormConfig"
+            }
+          }
+        ],
+        "source": {
+          "type": "StringLiteral",
+          "start": 29,
+          "end": 41,
+          "loc": { "start": { "line": 1, "column": 29, "index": 29 }, "end": { "line": 1, "column": 41, "index": 41 } },
+          "extra": { "rawValue": "types/form", "raw": "\"types/form\"" },
+          "value": "types/form"
+        }
+      },
+      {
+        "type": "ImportDeclaration",
+        "start": 44,
+        "end": 108,
+        "loc": { "start": { "line": 2, "column": 0, "index": 44 }, "end": { "line": 2, "column": 64, "index": 108 } },
+        "importKind": "value",
+        "specifiers": [
+          {
+            "type": "ImportSpecifier",
+            "start": 53,
+            "end": 66,
+            "loc": {
+              "start": { "line": 2, "column": 9, "index": 53 },
+              "end": { "line": 2, "column": 22, "index": 66 }
+            },
+            "imported": {
+              "type": "Identifier",
+              "start": 53,
+              "end": 66,
+              "loc": {
+                "start": { "line": 2, "column": 9, "index": 53 },
+                "end": { "line": 2, "column": 22, "index": 66 },
+                "identifierName": "useModelProps"
+              },
+              "name": "useModelProps"
+            },
+            "importKind": "value",
+            "local": {
+              "type": "Identifier",
+              "start": 53,
+              "end": 66,
+              "loc": {
+                "start": { "line": 2, "column": 9, "index": 53 },
+                "end": { "line": 2, "column": 22, "index": 66 },
+                "identifierName": "useModelProps"
+              },
+              "name": "useModelProps"
+            }
+          }
+        ],
+        "source": {
+          "type": "StringLiteral",
+          "start": 74,
+          "end": 107,
+          "loc": {
+            "start": { "line": 2, "column": 30, "index": 74 },
+            "end": { "line": 2, "column": 63, "index": 107 }
+          },
+          "extra": { "rawValue": "@/components/BaseForm/src/utils", "raw": "\"@/components/BaseForm/src/utils\"" },
+          "value": "@/components/BaseForm/src/utils"
+        }
+      },
+      {
+        "type": "TSInterfaceDeclaration",
+        "start": 112,
+        "end": 195,
+        "loc": { "start": { "line": 4, "column": 0, "index": 112 }, "end": { "line": 7, "column": 1, "index": 195 } },
+        "id": {
+          "type": "Identifier",
+          "start": 122,
+          "end": 128,
+          "loc": {
+            "start": { "line": 4, "column": 10, "index": 122 },
+            "end": { "line": 4, "column": 16, "index": 128 },
+            "identifierName": "IProps"
+          },
+          "name": "IProps"
+        },
+        "extends": [
+          {
+            "type": "TSExpressionWithTypeArguments",
+            "start": 137,
+            "end": 150,
+            "loc": {
+              "start": { "line": 4, "column": 25, "index": 137 },
+              "end": { "line": 4, "column": 38, "index": 150 }
+            },
+            "expression": {
+              "type": "Identifier",
+              "start": 137,
+              "end": 150,
+              "loc": {
+                "start": { "line": 4, "column": 25, "index": 137 },
+                "end": { "line": 4, "column": 38, "index": 150 },
+                "identifierName": "useModelProps"
+              },
+              "name": "useModelProps"
+            }
+          }
+        ],
+        "body": {
+          "type": "TSInterfaceBody",
+          "start": 151,
+          "end": 195,
+          "loc": {
+            "start": { "line": 4, "column": 39, "index": 151 },
+            "end": { "line": 7, "column": 1, "index": 195 }
+          },
+          "body": [
+            {
+              "type": "TSPropertySignature",
+              "start": 156,
+              "end": 167,
+              "loc": {
+                "start": { "line": 5, "column": 2, "index": 156 },
+                "end": { "line": 5, "column": 13, "index": 167 }
+              },
+              "key": {
+                "type": "Identifier",
+                "start": 156,
+                "end": 157,
+                "loc": {
+                  "start": { "line": 5, "column": 2, "index": 156 },
+                  "end": { "line": 5, "column": 3, "index": 157 },
+                  "identifierName": "a"
+                },
+                "name": "a"
+              },
+              "computed": false,
+              "optional": true,
+              "typeAnnotation": {
+                "type": "TSTypeAnnotation",
+                "start": 158,
+                "end": 166,
+                "loc": {
+                  "start": { "line": 5, "column": 4, "index": 158 },
+                  "end": { "line": 5, "column": 12, "index": 166 }
+                },
+                "typeAnnotation": {
+                  "type": "TSStringKeyword",
+                  "start": 160,
+                  "end": 166,
+                  "loc": {
+                    "start": { "line": 5, "column": 6, "index": 160 },
+                    "end": { "line": 5, "column": 12, "index": 166 }
+                  }
+                }
+              }
+            },
+            {
+              "type": "TSPropertySignature",
+              "start": 171,
+              "end": 192,
+              "loc": {
+                "start": { "line": 6, "column": 2, "index": 171 },
+                "end": { "line": 6, "column": 23, "index": 192 }
+              },
+              "key": {
+                "type": "Identifier",
+                "start": 171,
+                "end": 177,
+                "loc": {
+                  "start": { "line": 6, "column": 2, "index": 171 },
+                  "end": { "line": 6, "column": 8, "index": 177 },
+                  "identifierName": "config"
+                },
+                "name": "config"
+              },
+              "computed": false,
+              "typeAnnotation": {
+                "type": "TSTypeAnnotation",
+                "start": 177,
+                "end": 191,
+                "loc": {
+                  "start": { "line": 6, "column": 8, "index": 177 },
+                  "end": { "line": 6, "column": 22, "index": 191 }
+                },
+                "typeAnnotation": {
+                  "type": "TSTypeReference",
+                  "start": 179,
+                  "end": 191,
+                  "loc": {
+                    "start": { "line": 6, "column": 10, "index": 179 },
+                    "end": { "line": 6, "column": 22, "index": 191 }
+                  },
+                  "typeName": {
+                    "type": "Identifier",
+                    "start": 179,
+                    "end": 191,
+                    "loc": {
+                      "start": { "line": 6, "column": 10, "index": 179 },
+                      "end": { "line": 6, "column": 22, "index": 191 },
+                      "identifierName": "MlFormConfig"
+                    },
+                    "name": "MlFormConfig"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "ExportDefaultDeclaration",
+        "start": 197,
+        "end": 278,
+        "loc": { "start": { "line": 8, "column": 0, "index": 197 }, "end": { "line": 10, "column": 3, "index": 278 } },
+        "exportKind": "value",
+        "declaration": {
+          "type": "CallExpression",
+          "start": 212,
+          "end": 277,
+          "loc": {
+            "start": { "line": 8, "column": 15, "index": 212 },
+            "end": { "line": 10, "column": 2, "index": 277 }
+          },
+          "callee": {
+            "type": "Identifier",
+            "start": 212,
+            "end": 215,
+            "loc": {
+              "start": { "line": 8, "column": 15, "index": 212 },
+              "end": { "line": 8, "column": 18, "index": 215 },
+              "identifierName": "$FC"
+            },
+            "name": "$FunctionComponent"
+          },
+          "arguments": [
+            {
+              "type": "ArrayExpression",
+              "start": 0,
+              "end": 9,
+              "loc": { "start": { "line": 1, "column": 0, "index": 0 }, "end": { "line": 1, "column": 9, "index": 9 } },
+              "elements": [
+                {
+                  "type": "StringLiteral",
+                  "start": 1,
+                  "end": 4,
+                  "loc": {
+                    "start": { "line": 1, "column": 1, "index": 1 },
+                    "end": { "line": 1, "column": 4, "index": 4 }
+                  },
+                  "extra": { "rawValue": "a", "raw": "\"a\"" },
+                  "value": "a"
+                },
+                {
+                  "type": "StringLiteral",
+                  "start": 5,
+                  "end": 8,
+                  "loc": {
+                    "start": { "line": 1, "column": 5, "index": 5 },
+                    "end": { "line": 1, "column": 8, "index": 8 }
+                  },
+                  "extra": { "rawValue": "b", "raw": "\"b\"" },
+                  "value": "b"
+                }
+              ]
+            },
+            {
+              "type": "FunctionExpression",
+              "start": 224,
+              "end": 276,
+              "loc": {
+                "start": { "line": 8, "column": 27, "index": 224 },
+                "end": { "line": 10, "column": 1, "index": 276 }
+              },
+              "id": {
+                "type": "Identifier",
+                "start": 233,
+                "end": 237,
+                "loc": {
+                  "start": { "line": 8, "column": 36, "index": 233 },
+                  "end": { "line": 8, "column": 40, "index": 237 },
+                  "identifierName": "Base"
+                },
+                "name": "Base"
+              },
+              "generator": false,
+              "async": false,
+              "params": [],
+              "body": {
+                "type": "BlockStatement",
+                "start": 240,
+                "end": 276,
+                "loc": {
+                  "start": { "line": 8, "column": 43, "index": 240 },
+                  "end": { "line": 10, "column": 1, "index": 276 }
+                },
+                "body": [
+                  {
+                    "type": "ReturnStatement",
+                    "start": 245,
+                    "end": 273,
+                    "loc": {
+                      "start": { "line": 9, "column": 2, "index": 245 },
+                      "end": { "line": 9, "column": 30, "index": 273 }
+                    },
+                    "argument": {
+                      "type": "ArrowFunctionExpression",
+                      "start": 252,
+                      "end": 272,
+                      "loc": {
+                        "start": { "line": 9, "column": 9, "index": 252 },
+                        "end": { "line": 9, "column": 29, "index": 272 }
+                      },
+                      "id": null,
+                      "generator": false,
+                      "async": false,
+                      "params": [],
+                      "body": {
+                        "type": "JSXElement",
+                        "start": 258,
+                        "end": 272,
+                        "loc": {
+                          "start": { "line": 9, "column": 15, "index": 258 },
+                          "end": { "line": 9, "column": 29, "index": 272 }
+                        },
+                        "openingElement": {
+                          "type": "JSXOpeningElement",
+                          "start": 258,
+                          "end": 263,
+                          "loc": {
+                            "start": { "line": 9, "column": 15, "index": 258 },
+                            "end": { "line": 9, "column": 20, "index": 263 }
+                          },
+                          "name": {
+                            "type": "JSXIdentifier",
+                            "start": 259,
+                            "end": 262,
+                            "loc": {
+                              "start": { "line": 9, "column": 16, "index": 259 },
+                              "end": { "line": 9, "column": 19, "index": 262 }
+                            },
+                            "name": "div"
+                          },
+                          "attributes": [],
+                          "selfClosing": false
+                        },
+                        "closingElement": {
+                          "type": "JSXClosingElement",
+                          "start": 266,
+                          "end": 272,
+                          "loc": {
+                            "start": { "line": 9, "column": 23, "index": 266 },
+                            "end": { "line": 9, "column": 29, "index": 272 }
+                          },
+                          "name": {
+                            "type": "JSXIdentifier",
+                            "start": 268,
+                            "end": 271,
+                            "loc": {
+                              "start": { "line": 9, "column": 25, "index": 268 },
+                              "end": { "line": 9, "column": 28, "index": 271 }
+                            },
+                            "name": "div"
+                          }
+                        },
+                        "children": [
+                          {
+                            "type": "JSXText",
+                            "start": 263,
+                            "end": 266,
+                            "loc": {
+                              "start": { "line": 9, "column": 20, "index": 263 },
+                              "end": { "line": 9, "column": 23, "index": 266 }
+                            },
+                            "extra": { "rawValue": "123", "raw": "123" },
+                            "value": "123"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "directives": []
+              }
+            }
+          ],
+          "typeParameters": {
+            "type": "TSTypeParameterInstantiation",
+            "start": 215,
+            "end": 223,
+            "loc": {
+              "start": { "line": 8, "column": 18, "index": 215 },
+              "end": { "line": 8, "column": 26, "index": 223 }
+            },
+            "params": [
+              {
+                "type": "TSTypeReference",
+                "start": 216,
+                "end": 222,
+                "loc": {
+                  "start": { "line": 8, "column": 19, "index": 216 },
+                  "end": { "line": 8, "column": 25, "index": 222 }
+                },
+                "typeName": {
+                  "type": "Identifier",
+                  "start": 216,
+                  "end": 222,
+                  "loc": {
+                    "start": { "line": 8, "column": 19, "index": 216 },
+                    "end": { "line": 8, "column": 25, "index": 222 },
+                    "identifierName": "IProps"
+                  },
+                  "name": "IProps"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "directives": []
+  },
+  "comments": []
+}

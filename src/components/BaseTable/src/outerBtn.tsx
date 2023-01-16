@@ -4,7 +4,7 @@ import { BaseTableProps, MlTableOuterBtn } from "types/table";
 import { Ref } from "vue";
 
 // 内部处理删除逻辑
-export async function onDelete(data: Ref<AnyObj[]>, props: BaseTableProps, refresh: () => void) {
+export async function onDelete(data: AnyObj[], props: BaseTableProps, refresh: () => void) {
   if (!data?.length) {
     ElMessage.warning("请选择要删除的内容");
     return;
@@ -28,7 +28,7 @@ export async function onDelete(data: Ref<AnyObj[]>, props: BaseTableProps, refre
 
 export default function useOuterBtn(
   props: BaseTableProps,
-  data: AnyObj[],
+  data: Ref<AnyObj[]>,
   multipleSelection: AnyObj[],
   refresh: () => void
 ) {
@@ -50,7 +50,7 @@ export default function useOuterBtn(
     return (
       <div class="outer-btn-box">
         {props.outerBtn
-          .filter((btn) => (btn.showJudge ? btn.showJudge(data) : true))
+          .filter((btn) => (btn.showJudge ? btn.showJudge(data.value) : true))
           .map((btn, index) => {
             if (btn.render) {
               return btn.render();

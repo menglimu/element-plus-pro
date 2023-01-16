@@ -10,6 +10,7 @@ refhl.value?.b();
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <HelloWorld msg="1" />
+  <ElButton icon="a"></ElButton>
 </template>
 
 <style>

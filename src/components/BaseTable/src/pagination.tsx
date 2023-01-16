@@ -29,7 +29,7 @@ export default function usePagination(props: BaseTableProps, search: (type: stri
           onSize-change={handleSizeChange}
           onCurrent-change={handleCurrentChange}
           {...paginationConfig}
-        />
+        ></ElPagination>
       ) : null,
     currentPage,
     total,

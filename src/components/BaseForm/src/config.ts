@@ -5,9 +5,11 @@
  * @LastEditTime: 2020-12-28 16:59:13
  * @Description:  获取表单子项的配置
  */
-import { MlFormRule, MlFormColumn, ComponentsPreset, MlFormType, MlFormConfig } from "types/form";
+
 import { cloneDeep } from "lodash";
 import merge from "@/utils/merge";
+import { BaseFormColumn } from "./formItem";
+import { BaseFormConfig } from "./form";
 
 /**
  * @description:  // 一些类型的基本属性
@@ -17,58 +19,53 @@ import merge from "@/utils/merge";
  *
  */
 
-let componentsPreset = {};
-
-export function setComponentsPreset(prefix: string, others: ComponentsPreset = {}) {
-  componentsPreset = {
-    input: {
-      tag: prefix + "input",
-      nodeData: {
-        props: {
-          type: "text",
-        },
+let componentsPreset: AnyObj = {
+  input: {
+    tag: "el-" + "input",
+    nodeData: {
+      props: {
+        type: "text",
       },
     },
-    textarea: {
-      tag: prefix + "input",
-      nodeData: {
-        class: {
-          "text-input": true,
-        },
-        props: {
-          type: "textarea",
-        },
-        attrs: {
-          rows: 4,
-        },
+  },
+  textarea: {
+    tag: "el-" + "input",
+    nodeData: {
+      class: {
+        "text-input": true,
+      },
+      props: {
+        type: "textarea",
+      },
+      attrs: {
+        rows: 4,
       },
     },
-    select: {
-      tag: prefix + "select",
-      nodeData: {
-        props: {
-          "popper-append-to-body": true,
-        },
+  },
+  select: {
+    tag: "el-" + "select",
+    nodeData: {
+      props: {
+        "popper-append-to-body": true,
       },
     },
-    radio: {
-      tag: prefix + "radio-group",
-    },
-    checkbox: {
-      tag: prefix + "checkbox-group",
-    },
-    date: {
-      tag: prefix + "date-picker",
-    },
-    time: {
-      tag: prefix + "time-picker",
-    },
-    ...others,
-  };
-}
+  },
+  radio: {
+    tag: "el-" + "radio-group",
+  },
+  checkbox: {
+    tag: "el-" + "checkbox-group",
+  },
+  date: {
+    tag: "el-" + "date-picker",
+  },
+  time: {
+    tag: "el-" + "time-picker",
+  },
+};
 
 // 设置组件内的默认属性
-function getPreset(config: MlFormColumn) {
+function getPreset(config: BaseFormColumn) {
   // 根据不同类型，匹配不同默认配置，多种类型共用一个配置的情况
   let defaultConfig: AnyObj = { nodeData: { props: {} } };
 
@@ -114,7 +111,7 @@ function getPreset(config: MlFormColumn) {
   return defaultConfig;
 }
 // 设置表单项的校验规则
-function getRules(config: MlFormColumn, prefix: string) {
+function getRules(config: BaseFormColumn, prefix: string) {
   // 因为空校验和错误校验，UI颜色区别，所以要实时判空的原因，将所有的校验trigger修改为change
   let trigger: "blur" | "change" = "blur";
   if (prefix === "选择") {
@@ -158,7 +155,7 @@ function getRules(config: MlFormColumn, prefix: string) {
   }
 }
 // 获取基本配置
-function getBaseConfig(config: MlFormColumn, rootConfig: MlFormConfig, prefix: string) {
+function getBaseConfig(config: BaseFormColumn, rootConfig: BaseFormConfig, prefix: string) {
   let config_: AnyObj = {
     itemMaxWidth: rootConfig.itemMaxWidth || "100%",
     show: true, // 初始化显示条件
@@ -209,7 +206,7 @@ function getPrefix(type?: MlFormType) {
   return placeholderPrefix;
 }
 // 获取表单某项的配置
-export function getFormColumn(mlFormColumn: MlFormColumn, mlFormConfig: MlFormConfig): MlFormColumn {
+export function getFormColumn(mlFormColumn: BaseFormColumn, mlFormConfig: BaseFormConfig): BaseFormColumn {
   let config = cloneDeep(mlFormColumn);
   let prefix = getPrefix(config.type);
   // 获取基本配置
