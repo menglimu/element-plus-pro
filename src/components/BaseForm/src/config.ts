@@ -8,8 +8,10 @@
 
 import { cloneDeep } from "lodash";
 import merge from "@/utils/merge";
-import { BaseFormColumn } from "./formItem";
-import { BaseFormConfig } from "./form";
+import { BaseFormColumn, BaseFormType } from "./formItem";
+import { BaseFormConfig, BaseFormProps } from "./form";
+import { FormItemRule } from "element-plus";
+import { readonly } from "vue";
 
 /**
  * @description:  // 一些类型的基本属性
@@ -22,32 +24,22 @@ import { BaseFormConfig } from "./form";
 let componentsPreset: AnyObj = {
   input: {
     tag: "el-" + "input",
-    nodeData: {
-      props: {
-        type: "text",
-      },
+    props: {
+      type: "text",
     },
   },
   textarea: {
     tag: "el-" + "input",
-    nodeData: {
-      class: {
-        "text-input": true,
-      },
-      props: {
-        type: "textarea",
-      },
-      attrs: {
-        rows: 4,
-      },
+    props: {
+      "text-input": true,
+      type: "textarea",
+      rows: 4,
     },
   },
   select: {
     tag: "el-" + "select",
-    nodeData: {
-      props: {
-        "popper-append-to-body": true,
-      },
+    props: {
+      "popper-append-to-body": true,
     },
   },
   radio: {
@@ -75,37 +67,35 @@ function getPreset(config: BaseFormColumn) {
   }
 
   if (config.type) {
-    if (["string"].includes(config.type)) {
-      defaultConfig = componentsPreset["input"];
-    } else if (["date", "dates", "daterange", "datetime", "datetimerange"].includes(config.type)) {
+    if (["date", "dates", "daterange", "datetime", "datetimerange"].includes(config.type)) {
       defaultConfig = componentsPreset[config.type] || componentsPreset["date"];
-      defaultConfig.nodeData = { props: { type: config.type } };
+      defaultConfig.props = { type: config.type };
     } else if (["time", "timerange"].includes(config.type)) {
       defaultConfig = componentsPreset[config.type] || componentsPreset["time"];
-      defaultConfig.nodeData = { props: { type: config.type } };
+      defaultConfig.props = { type: config.type };
     } else {
       defaultConfig = componentsPreset[config.type] || {};
     }
 
     // 时间，日期的数据初始化
     if (["time", "timerange"].includes(config.type)) {
-      defaultConfig.nodeData.props["value-format"] = "HH:mm:ss";
+      defaultConfig.props["value-format"] = "HH:mm:ss";
       if (config.type === "timerange") {
-        defaultConfig.nodeData.props["is-range"] = true;
+        defaultConfig.props["is-range"] = true;
       }
     } else if (["date", "dates", "daterange"].includes(config.type)) {
-      defaultConfig.nodeData.props["value-format"] = "yyyy-MM-dd";
+      defaultConfig.props["value-format"] = "yyyy-MM-dd";
     } else if (["datetime", "datetimerange"].includes(config.type)) {
-      defaultConfig.nodeData.props["value-format"] = "yyyy-MM-dd HH:mm:ss";
+      defaultConfig.props["value-format"] = "yyyy-MM-dd HH:mm:ss";
     }
     if (["datetimerange"].includes(config.type)) {
-      defaultConfig.nodeData.props["default-time"] = ["00:00:00", "23:59:59"];
+      defaultConfig.props["default-time"] = ["00:00:00", "23:59:59"];
     }
 
     if (["datetimerange", "daterange"].includes(config.type)) {
-      defaultConfig.nodeData.props["range-separator"] = "至";
-      defaultConfig.nodeData.props["start-placeholder"] = "开始时间";
-      defaultConfig.nodeData.props["end-placeholder"] = "结束时间";
+      defaultConfig.props["range-separator"] = "至";
+      defaultConfig.props["start-placeholder"] = "开始时间";
+      defaultConfig.props["end-placeholder"] = "结束时间";
     }
   }
   return defaultConfig;
@@ -119,7 +109,7 @@ function getRules(config: BaseFormColumn, prefix: string) {
   }
 
   // 生成默认的一些校验规则
-  const rules: Array<MlFormRule> = [];
+  const rules: Array<FormItemRule> = [];
   if (config.minlength !== undefined) {
     rules.push({
       pattern: new RegExp(`^(.|\n){${config.minlength},}$`),
@@ -151,7 +141,11 @@ function getRules(config: BaseFormColumn, prefix: string) {
     });
   }
   if (rules.length > 0) {
-    config.rules = [...(config.rules || []), ...rules];
+    config.rules = Array.isArray(config.rules)
+      ? config.rules.concat(rules)
+      : config.rules
+      ? [config.rules].concat(rules)
+      : rules;
   }
 }
 // 获取基本配置
@@ -183,7 +177,7 @@ function getBaseConfig(config: BaseFormColumn, rootConfig: BaseFormConfig, prefi
 }
 
 // 根据类型获取是输入还是选择的
-function getPrefix(type?: MlFormType) {
+function getPrefix(type?: BaseFormType) {
   let placeholderPrefix = "输入";
 
   if (

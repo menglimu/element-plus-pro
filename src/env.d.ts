@@ -13,3 +13,8 @@ interface AnyObj {
 
 /** 获取数组中的每一项对应的类型 */
 type InferArray<T> = T extends (infer U)[] ? U : never;
+
+/** 去掉readonly */
+type UnReadonly<T> = {
+  -readonly [P in keyof T]: T[P];
+};

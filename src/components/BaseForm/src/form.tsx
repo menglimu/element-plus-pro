@@ -2,7 +2,7 @@
  * 表单组件
  *
  */
-import { nextTick, onMounted, ref, watchEffect } from "vue";
+import { WatchStopHandle, nextTick, onMounted, ref, watch, watchEffect } from "vue";
 // import FormItem from "./formItem";
 import { cloneDeep } from "lodash";
 
@@ -11,10 +11,11 @@ import "./form.scss";
 import { ElForm, FormInstance, FormProps } from "element-plus";
 import FormItem, { BaseFormColumn } from "./formItem";
 import { useModel, UseModelEmits, UseModelProps } from "./utils";
+import { ReactiveVariable } from "vue/macros";
 // import style from 'index.module.scss'
 
 /** 表单的配置项,D为输出的data对象的类型 */
-export interface BaseFormConfig<D = AnyObj> extends FormProps {
+export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps>> {
   /** 具体表单项的配置 */
   columns: Array<BaseFormColumn<D>>;
   /** 是否显示清除按钮 */
@@ -36,14 +37,14 @@ export interface BaseFormConfig<D = AnyObj> extends FormProps {
    */
   // autoSize?: boolean;
 }
+// type a = { A: string } & { A: string | number };
 
-export interface BaseFormProps<D = AnyObj> extends UseModelProps<D> {
+// const a: a = { A: 1 };
+
+export interface BaseFormProps<D = AnyObj> extends UseModelProps<D>, Partial<FormProps> {
   config: BaseFormConfig<D>;
 }
 
-// interface IEmits extends UseModelEmits<AnyObj> {
-//   a: () => void;
-// }
 export type BaseFormEmits = UseModelEmits<AnyObj>;
 
 export interface BaseFormExpose extends FormInstance {
@@ -59,27 +60,34 @@ const configDefault = {
   labelWidth: "100px",
   // uiType: 'round',
   clearable: true,
-  "label-suffix": "：",
+  "label-suffix": ":",
   // size: "small",
 };
 export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
   name: "BaseForm",
-  props: ["config", "value"],
+  inheritAttrs: false,
+  props: ["config", "modelValue"],
   setup(props, { expose, emit }) {
-    const { config } = $(props);
     const { value, emitValue } = useModel(props, emit);
+    const value_ = $(value);
+
     // form的配置项
-    let config_ = $ref<BaseFormConfig>();
+    let config_: BaseFormConfig = $ref({ columns: [] });
     // 初始值
     let initValue = {};
     const elForm = ref<FormInstance>();
 
     // 初始化值
-    watchEffect(() => {
-      config_ = merge(configDefault, config);
-      initValue = getDefaultValue(config_);
-      emitValue({ ...initValue, ...value });
-    });
+    watchEffect(() => Object.assign(config_, configDefault, props.config));
+    watch(
+      () => config_.columns,
+      () => {
+        console.log("columns change");
+        initValue = getDefaultValue(config_);
+        emitValue({ ...initValue, ...value_ });
+      },
+      { deep: true, immediate: true }
+    );
 
     onMounted(() => {
       // 重写form的 resetFields
@@ -88,7 +96,7 @@ export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
 
     // useAutoSize(config);
 
-    // 重新加载options
+    // TODO 重新加载options
     function reloadOptions(name: string) {
       // ($refs?.[name] as any)?.onOptionsGetChange?.();
     }
@@ -108,38 +116,32 @@ export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
 
     // 监听值改变设置某一项value_的值
     function onItemInput(prop?: string, value?: any) {
-      if (!prop) return;
-      value.value[prop] = value;
-      emitValue(value.value);
+      if (!prop || !value_) return;
+      value_[prop] = value;
+      emitValue(value_);
     }
 
     return () => {
-      // eslint-disable-next-line
-      const { columns, clearable, ...formAttrs } = config_;
-
+      // 通过解构。将所有用户属性解构到form中
+      const { columns, clearable, ...formProps } = config_;
       return (
-        // 通过解构。将所有用户属性解构到form中
         <ElForm
-          ref="form"
-          // attrs={formAttrs}
-          // {...{ model: value_, ...formAttrs }}
+          ref={elForm}
+          {...formProps}
           class={[config_.size, "label-" + config_.labelPosition, "ml-form"]}
-          model={value}
-          labelSuffix="11"
+          model={value_}
         >
           {columns.map((item, index) => {
             return (
               <FormItem
                 key={item.key || item.prop || index}
-                // ref={item.key || item.prop}
                 configItem={item}
-                rootValue={value.value}
+                rootValue={value_!}
                 rootConfig={config_}
-                onInput={(value: any) => onItemInput(item.prop, value)}
+                cbInput={onItemInput}
               />
             );
           })}
-          {/* {slots.default} */}
         </ElForm>
       );
     };

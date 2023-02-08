@@ -18,7 +18,7 @@
     "@vitejs/plugin-vue-jsx": "^2.0.1",
     "ast-types": "^0.14.2",
     "sass": "^1.55.0",
-    "typescript": "^4.5.4",
+    "typescript": "5.0.0-beta",
     "vite": "^3.1.4",
     "vue-tsc": "^0.34.7"
   }

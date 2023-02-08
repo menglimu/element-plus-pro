@@ -5,46 +5,50 @@
 
 import {
   VNode,
-  watchEffect,
   ref,
   resolveComponent,
   h,
   cloneVNode,
   mergeProps,
-  reactive,
-  isProxy,
-  isRef,
-  shallowReactive,
   VNodeChild,
+  watch,
+  computed,
+  toRef,
+  Ref,
+  onMounted,
 } from "vue";
 import { isNull } from "@/utils";
 
 import { getFormColumn } from "./config";
-import { FormItemInstance, formItemProps, FormItemProps } from "element-plus";
-import { useModel, UseModelEmits, UseModelProps, useOptions, UseOptionsProps } from "./utils";
+import { ElOption, FormItemInstance, formItemProps, FormItemProps } from "element-plus";
+import { useOptions, UseOptionsProps } from "./utils";
 import { BaseFormConfig, BaseFormProps } from "./form";
 
 /** 表单的具体项配置 */
-export interface BaseFormColumn<D = AnyObj> extends UseOptionsProps, FormItemProps {
+export interface BaseFormColumn<D = AnyObj>
+  extends UseOptionsProps,
+    UnReadonly<Omit<Partial<FormItemProps>, "required">> {
+  /** 绑定的键名 */
   prop?: string;
+  /** 表单项的vue组件唯一key名。默认使用prop || index，当prop重复是，需要传入该参数 */
+  key?: string;
+
   /** 表单的类型，自定义的时候，传''或者不传 */
   type?: BaseFormType;
+  /** 标签名，不填会从组件内匹配，自定义标签的时候，使用 */
+  tag?: string;
 
   /** 默认值，初始化的时候，会有一次默认值计算，该项有值得时候，取该值。重置时也会重置到该值 */
   value?: unknown;
 
+  disabled?: boolean | ((rootValue: D) => boolean);
   /** 输入框内的提示文本 */
   placeholder?: string;
 
-  /** 表单项的vue组件唯一key名。默认使用prop || index，当prop重复是，需要传入该参数 */
-  key?: string;
-
   /** 输入项的子对象 */
   children?: () => VNodeChild;
-
   /** 自定义输入项的渲染 */
-  render?: (value: unknown, onInput: (value?: unknown) => void) => VNode;
-
+  render?: (value: unknown, onInput: (value?: unknown) => void, rootValue: AnyObj) => VNode;
   /** nodeData的props的代理 */
   props?: AnyObj;
 
@@ -82,9 +86,8 @@ export interface BaseFormColumn<D = AnyObj> extends UseOptionsProps, FormItemPro
   maxlength?: number;
   /** 值的正则校验表达式 */
   reg?: string | RegExp;
-
-  /** 标签名，不填会从组件内匹配，自定义标签的时候，使用 */
-  tag?: string;
+  /** 是否必填 */
+  required?: boolean | ((rootValue: D) => boolean);
 }
 
 /** 表单的类型 */
@@ -108,29 +111,24 @@ export type BaseFormType =
   | "color"
   | "cascader";
 
-interface BaseFormItemProps extends UseModelProps {
+interface BaseFormItemProps {
   configItem: BaseFormColumn;
-  rootValue?: AnyObj;
+  rootValue: AnyObj;
   rootConfig: BaseFormConfig;
+  cbInput: (prop?: string, val?: unknown) => void;
 }
-type BaseFormItemEmits = UseModelEmits<AnyObj>;
-
-export default FC<
-  BaseFormItemProps,
-  BaseFormItemEmits,
-  { xxxx: () => void; aaa: (a: number) => void; input: (a: number) => void }
->({
-  name: "FormItem",
-  props: ["configItem", "rootValue", "rootConfig", "value"],
-
-  setup(props, { emit }) {
-    const { configItem, rootValue, rootConfig } = $(props);
-
+type BaseFormItemExpose = AnyObj & { relaodOptions: () => Promise<unknown> };
+export default FC<BaseFormItemProps, BaseFormItemExpose>({
+  name: "BaseFormItem",
+  props: ["configItem", "rootValue", "rootConfig", "cbInput"],
+  setup(props, { expose }) {
+    const { configItem, rootValue, rootConfig, cbInput } = $(props);
     const elFormItem = ref<FormItemInstance>();
+    const formItem = ref();
 
-    let config_ = $computed(() => getFormColumn(configItem, rootConfig));
-    console.log(isProxy(config_));
-
+    const config = $computed(() => getFormColumn(configItem, rootConfig));
+    const isHide = $computed(() => (typeof config.hide === "function" ? config.hide(rootValue || {}) : config.hide));
+    // 提取出 elformItem 的一些props
     const elFormItemProps = $computed(() => {
       const objs: AnyObj = {};
       Object.keys(props.configItem)
@@ -142,96 +140,96 @@ export default FC<
     });
 
     // 下拉，单选，多选等的选择项
-    const options = useOptions({ options: [] });
-    const { value, emitValue } = useModel(props, emit);
-
-    const isHide = $computed(() => (typeof config_.hide === "function" ? config_.hide(rootValue || {}) : config_.hide));
-
-    function onInput(val: any) {
-      emitValue(val);
-
-      elFormItem.value?.$emit("el.form.change");
-    }
-
-    function renderChildren() {
-      if (typeof config_.children === "function") {
-        return config_.children();
-      }
-      const options_ = isNull(options) ? config_.options : options;
-      if (["radio", "checkbox", "select"].includes(config_.type!) && Array.isArray(options)) {
+    const { options, relaodOptions } = useOptions($$(config));
+    const children = $computed(() => {
+      if (["radio", "checkbox", "select"].includes(config.type!) && Array.isArray(options.value)) {
         // 下拉列表时，渲染下拉项
-        if (config_.type === "select") {
-          return options.map((option, index) => (
+        if (config.type === "select") {
+          return options.value.map((option, index) => (
             <el-option {...{ props: option }} key={index} label={option["label"]} value={option["value"]}></el-option>
           ));
-        } else if (config_.type === "radio") {
+        } else if (config.type === "radio") {
           // 单选框、多选框
-          return options.map((option, index) => (
+          return options.value.map((option, index) => (
             <el-radio {...{ ...option, label: option["value"] }} key={index}>
               {option["label"]}
             </el-radio>
           ));
-        } else if (config_.type === "checkbox") {
+        } else if (config.type === "checkbox") {
           // 单选框、多选框
-          return options.map((option, index) => (
+          return options.value.map((option, index) => (
             <el-checkbox {...{ ...option, label: option["value"] }} key={index}>
               {option["label"]}
             </el-checkbox>
           ));
         }
       }
-      return [];
-    }
+    });
 
-    return () => {
-      if (isHide) {
+    // 渲染vnode
+    const vnode = $computed(() => {
+      // 不需要渲染的时候，直接不进行下面的操作
+      if ((config.render && !config.prop) || isHide) {
         return;
       }
-      // 按钮等其他元素的渲染。 无prop属性名
-      if (config_.render && !config_.prop) {
-        let vnode = config_.render(value, onInput);
-        return vnode;
-      }
-
-      // 渲染vnode
-      let vnode: VNode | Element;
+      let vnode: VNode;
       // 将base基础的属性放入公共对象。因为子组件可能没有定义prop而直接取attr的时候。先将这些属性同时复制到attr和prop
       let baseProps: AnyObj = {
         size: rootConfig.size,
-        disabled: rootConfig.disabled,
+        disabled:
+          typeof config.disabled === "function" ? config.disabled(rootValue) : config.disabled ?? rootConfig.disabled,
         clearable: rootConfig.clearable,
-        placeholder: config_.placeholder,
-        modelValue: value,
+        placeholder: config.placeholder,
+        modelValue: rootValue[config.prop!],
         "onUpdate:modelValue": onInput,
+        ref: formItem,
       };
-      if (config_.optionsGet) {
-        baseProps.options = options;
+      if (config.optionsGet) {
+        baseProps.options = options.value;
       }
 
       // 绑定value和input事件
-      let props = mergeProps(baseProps);
+      let props = mergeProps(baseProps, config.props || {});
 
       // 有prop属性名和render同时存在的时候。render作为输入元素
-      if (config_.prop && config_.render) {
-        vnode = config_.render(value, onInput);
+      if (config.prop && config.render) {
+        vnode = config.render(rootValue[config.prop!], onInput, rootValue);
       } else {
-        const Tag = config_.tag || "el-" + config_.type;
-        vnode = h(resolveComponent(Tag), renderChildren);
+        const Tag = config.tag || "el-" + config.type;
+        vnode = h(resolveComponent(Tag), config.children || children);
       }
       vnode = cloneVNode(vnode, props);
-      console.log(elFormItemProps);
+      return vnode;
+    });
 
+    onMounted(() => {
+      formItem.value.relaodOptions = relaodOptions;
+      expose(formItem.value);
+    });
+
+    function onInput(val: any) {
+      // emitValue(val);
+      cbInput(config.prop, val);
+      elFormItem.value?.$emit("el.form.change");
+    }
+
+    return () => {
+      if (isHide) return;
+      // 按钮等其他元素的渲染。 无prop属性名
+      if (config.render && !config.prop) {
+        return config.render(rootValue[config.prop!], onInput, rootValue);
+      }
       return (
         <el-form-item
           ref={elFormItem}
           class={{
             "ml-form-item": true,
-            ["ml-form-" + config_.type]: true,
-            "ml-form-item-block": config_.block,
+            ["ml-form-" + config.type]: true,
+            "ml-form-item-block": config.block,
             hide: isHide,
             // 'is-not-value': isNotValue
           }}
-          style={{ width: config_.itemWidth, maxWidth: config_.itemMaxWidth }}
+          style={{ width: config.itemWidth, maxWidth: config.itemMaxWidth }}
           {...elFormItemProps}
         >
           {vnode}

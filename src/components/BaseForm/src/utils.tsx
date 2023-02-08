@@ -1,39 +1,41 @@
 import { isEqual, cloneDeep } from "lodash";
-import { ref, UnwrapNestedRefs, watch, watchEffect } from "vue";
+import { isRef, Ref, ref, unref, UnwrapNestedRefs, watch, watchEffect, WatchStopHandle } from "vue";
+import { ReactiveVariable } from "vue/macros";
 
 export interface UseModelProps<V = unknown> {
-  value?: V;
+  modelValue?: V;
   // onInput?: (value: V) => void;
 }
-// emit使用interface 会出现类型不符。interface 往 Record 复制 报错
+// emit使用interface 会出现类型不符。interface 往 Record 赋值 报错
 // export interface UseModelEmits<V = unknown> {
 //   input: (value: V) => void;
 // }
 export type UseModelEmits<V = unknown> = {
-  input: (value: V) => void;
+  "update:modelValue": (value: V) => void;
 };
 /** 监听 props 中的value 返回 拷贝的prop中的value 和 触发事件的方法 */
-export function useModel<T extends UseModelProps>(props: T, emit: Function) {
-  let $value = $ref<T["value"]>(props.value);
-  let value = ref<T["value"]>(cloneDeep(props.value));
-
-  watch([props.value], setValue);
+export function useModel<T extends UseModelProps>(props: ReactiveVariable<T>, emit: Function) {
+  let propsValue: Ref<T["modelValue"]> = ref(props.modelValue);
+  let value: Ref<T["modelValue"]> = ref(cloneDeep(props.modelValue));
+  watch(() => props.modelValue, setValue);
 
   function setValue() {
-    if (isEqual($value, value.value)) return;
-    value.value = $value;
+    propsValue = ref(props.modelValue);
+    value = ref(cloneDeep(props.modelValue));
+    if (isEqual(propsValue.value, value.value)) return;
+    value.value = propsValue.value;
   }
-  function emitValue(val: T["value"]) {
+  function emitValue(val: T["modelValue"]) {
     value.value = val;
-    emit?.("input", cloneDeep(val));
+    emit?.("update:modelValue", cloneDeep(val));
   }
   return { emitValue, value };
 }
 
 /** 选项各字段对应的key的名字 */
 interface PropNames {
-  label?: string;
-  value?: string;
+  label: string;
+  value: string;
   children?: string;
   disabled?: string;
   isLeaf?: string;
@@ -48,22 +50,58 @@ export interface UseOptionsProps<O = AnyObj> {
   propNames?: PropNames;
 }
 /** 监听 */
-export function useOptions<T extends UseOptionsProps>(props: UnwrapNestedRefs<T>, needTransName = true) {
-  const options = ref(props.options || []);
+export function useOptions<T extends UseOptionsProps>(props: T | Ref<T>, needTransName = true) {
+  const options = ref<AnyObj[]>([]);
+  if (isRef(props)) {
+    let optionsWt: WatchStopHandle;
+    let optionsGetWt: WatchStopHandle;
+    watch(
+      props,
+      () => {
+        optionsWt?.();
+        optionsGetWt?.();
+        props.value.options && (optionsWt = watchEffect(() => (options.value = props.value.options || [])));
+        props.value.optionsGet && (optionsGetWt = watchEffect(relaodOptions));
+      },
+      { immediate: true }
+    );
+  } else {
+    watchEffect(() => (options.value = props.options || []));
+    watchEffect(relaodOptions);
+  }
 
-  watch([props.options], () => (options.value = props.options || []));
-  watch([props.optionsGet], onOptionsGetChange);
+  // watchEffect(() => {
+  //   options.value = props.options || [];
+  //   console.log(1234, options);
+  // });
 
-  async function onOptionsGetChange() {
-    if (typeof props.optionsGet === "function") {
-      const res = await props.optionsGet();
+  async function relaodOptions() {
+    const props_ = unref(props);
+    if (typeof props_.optionsGet === "function") {
+      const res = await props_.optionsGet();
+      let arry: AnyObj[] = [];
       if (Array.isArray(res)) {
-        options.value = res;
+        arry = res;
       } else if ("content" in res && Array.isArray(res.content)) {
-        options.value = res.content;
+        arry = res.content;
       } else if ("data" in res && Array.isArray(res.data)) {
-        options.value = res.data;
+        arry = res.data;
       }
+      if (needTransName) {
+        arry = trans(arry, props_.propNames);
+      }
+      options.value = arry;
     }
   }
+
+  function trans(arry: AnyObj[], propNames?: PropNames) {
+    if (Array.isArray(arry) && propNames) {
+      arry.forEach((item) => {
+        item.lable = item[propNames.label];
+      });
+    }
+    return arry;
+  }
+
+  return { options, relaodOptions };
 }
