@@ -3,26 +3,11 @@
  * @Description: 表单的单项
  */
 
-import {
-  VNode,
-  ref,
-  resolveComponent,
-  h,
-  cloneVNode,
-  mergeProps,
-  VNodeChild,
-  watch,
-  computed,
-  toRef,
-  Ref,
-  onMounted,
-} from "vue";
-import { isNull } from "@/utils";
-
+import { VNode, ref, resolveComponent, h, cloneVNode, mergeProps, VNodeChild, onMounted } from "vue";
 import { getFormColumn } from "./config";
-import { ElOption, FormItemInstance, formItemProps, FormItemProps } from "element-plus";
+import { FormItemInstance, formItemProps, FormItemProps } from "element-plus";
 import { useOptions, UseOptionsProps } from "./utils";
-import { BaseFormConfig, BaseFormProps } from "./form";
+import { BaseFormConfig } from "./form";
 
 /** 表单的具体项配置 */
 export interface BaseFormColumn<D = AnyObj>
@@ -64,22 +49,6 @@ export interface BaseFormColumn<D = AnyObj>
    */
   block?: boolean;
 
-  /**
-   * 每个输入项的长度，默认 33.33%， block默认100%
-   * @default 33.33%， block默认100%
-   */
-  itemBoxWidth?: string;
-  /**
-   * 输入项内容的长度，默认100%
-   * @default 100%
-   */
-  itemWidth?: string;
-  /**
-   * 输入项内容的最大长度，默认100%
-   * @default 100%
-   */
-  itemMaxWidth?: string;
-
   /** 最小长度 */
   minlength?: number;
   /** 最大长度 */
@@ -116,6 +85,7 @@ interface BaseFormItemProps {
   rootValue: AnyObj;
   rootConfig: BaseFormConfig;
   cbInput: (prop?: string, val?: unknown) => void;
+  "aaa:ac": string;
 }
 type BaseFormItemExpose = AnyObj & { relaodOptions: () => Promise<unknown> };
 export default FC<BaseFormItemProps, BaseFormItemExpose>({
@@ -141,7 +111,7 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
 
     // 下拉，单选，多选等的选择项
     const { options, relaodOptions } = useOptions($$(config));
-    const children = $computed(() => {
+    const children = () => {
       if (["radio", "checkbox", "select"].includes(config.type!) && Array.isArray(options.value)) {
         // 下拉列表时，渲染下拉项
         if (config.type === "select") {
@@ -164,7 +134,7 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
           ));
         }
       }
-    });
+    };
 
     // 渲染vnode
     const vnode = $computed(() => {
@@ -222,14 +192,15 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
       return (
         <el-form-item
           ref={elFormItem}
-          class={{
-            "ml-form-item": true,
-            ["ml-form-" + config.type]: true,
-            "ml-form-item-block": config.block,
-            hide: isHide,
-            // 'is-not-value': isNotValue
-          }}
-          style={{ width: config.itemWidth, maxWidth: config.itemMaxWidth }}
+          class={[
+            config.className,
+            "ml-form-item",
+            "ml-form-" + config.type,
+            {
+              "ml-form-item-block": config.block,
+              hide: isHide,
+            },
+          ]}
           {...elFormItemProps}
         >
           {vnode}

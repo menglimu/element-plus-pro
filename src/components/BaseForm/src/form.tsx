@@ -20,39 +20,23 @@ export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps
   columns: Array<BaseFormColumn<D>>;
   /** 是否显示清除按钮 */
   clearable?: boolean;
-  // /** 每个输入项的长度，
-  //  * @default  33.33%, block 默认100%
-  //  */
-  // itemBoxWidth?: string; // 输入项宽度
-  // /** 输入项内容的长度
-  //  * @default 100%
-  //  */
-  // itemWidth?: string;
-  // /** 输入项内容的最大长度
-  //  * @default 100%
-  //  */
-  // itemMaxWidth?: string;
   /** 自适应表单大小
    * @default false
    */
   // autoSize?: boolean;
 }
-// type a = { A: string } & { A: string | number };
-
-// const a: a = { A: 1 };
 
 export interface BaseFormProps<D = AnyObj> extends UseModelProps<D>, Partial<FormProps> {
   config: BaseFormConfig<D>;
 }
-
-export type BaseFormEmits = UseModelEmits<AnyObj>;
-
 export interface BaseFormExpose extends FormInstance {
   /** 重置初始值 */
   reset(): void;
   /** 重新刷新options name 为需要刷新的那项 key 或者 prop */
   reloadOptions(name: string): void;
 }
+
+export type BaseFormEmits = UseModelEmits<AnyObj>;
 
 // config 默认值,
 const configDefault = {
@@ -68,14 +52,14 @@ export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
   inheritAttrs: false,
   props: ["config", "modelValue"],
   setup(props, { expose, emit }) {
+    const elForm = ref<FormInstance>();
+
     const { value, emitValue } = useModel(props, emit);
     const value_ = $(value);
-
     // form的配置项
     let config_: BaseFormConfig = $ref({ columns: [] });
     // 初始值
     let initValue = {};
-    const elForm = ref<FormInstance>();
 
     // 初始化值
     watchEffect(() => Object.assign(config_, configDefault, props.config));
