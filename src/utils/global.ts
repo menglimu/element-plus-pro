@@ -1,9 +1,11 @@
+import { UseModelEmits, UseModelProps, useModel } from "@/components/BaseForm/src/utils";
 import {
   Component,
   DefineComponent,
   defineComponent,
   Directive,
   EmitsOptions,
+  Ref,
   RenderFunction,
   SetupContext,
 } from "vue";
@@ -14,17 +16,17 @@ type UnionToIntersection<U> = (U extends any ? (a: (k: U) => void) => void : nev
 type UnionLast<U> = UnionToIntersection<U> extends (a: infer I) => void ? I : never;
 type UnionToTuple<U> = [U] extends [never] ? [] : [...UnionToTuple<Exclude<U, UnionLast<U>>>, UnionLast<U>];
 
-type EmitFn<Options = Record<string, any>, Event extends keyof Options = keyof Options> = Options extends Array<infer V>
-  ? (event: V, ...args: any[]) => void
-  : {} extends Options
-  ? (event: string, ...args: any[]) => void
-  : UnionToIntersection<
-      {
-        [key in Event]: Options[key] extends (...args: infer Args) => any
-          ? (event: key, ...args: Args) => void
-          : (event: key, ...args: any[]) => void;
-      }[Event]
-    >;
+// type EmitFn<Options = Record<string, any>, Event extends keyof Options = keyof Options> = Options extends Array<infer V>
+//   ? (event: V, ...args: any[]) => void
+//   : {} extends Options
+//   ? (event: string, ...args: any[]) => void
+//   : UnionToIntersection<
+//       {
+//         [key in Event]: Options[key] extends (...args: infer Args) => any
+//           ? (event: key, ...args: Args) => void
+//           : (event: key, ...args: any[]) => void;
+//       }[Event]
+//     >;
 
 interface SetupCtx<RawBindings, Emits> {
   attrs: SetupContext["attrs"];
@@ -50,14 +52,54 @@ type FunctionComponent = <Props extends AnyObj = {}, Emits extends EmitsOptions 
   options: ComponentOptionsBase<Props, Emits, RawBindings>
 ) => DefineComponent<Props, RawBindings, {}, {}, {}, {}, {}, Emits>;
 
-const functionComponent: FunctionComponent = (options: any) => defineComponent(options) as any;
+const functionComponent = (options: any) => defineComponent(options) as any;
+
+interface FormFcPorps {
+  placeholder?: string;
+  disabled?: boolean;
+  clearable?: boolean;
+  readonly?: boolean;
+}
+interface ComponentOptionsForm<V, Props, Emits, RawBindings>
+  extends Omit<ComponentOptionsBase<Props, Emits, RawBindings>, "setup"> {
+  setup: (
+    props: Readonly<Props>,
+    ctx: SetupCtx<RawBindings, Emits>,
+    model: {
+      emitValue: (val: V) => void;
+      value: Ref<V>;
+    }
+  ) => Promise<RawBindings> | RawBindings | RenderFunction | void;
+}
+type FormFunctionComponent = <
+  V = unknown,
+  Props extends AnyObj = {},
+  Emits extends EmitsOptions = {},
+  RawBindings extends AnyObj = {}
+>(
+  options: ComponentOptionsForm<V, Props & FormFcPorps & UseModelProps<V>, Emits & UseModelEmits<V>, RawBindings>
+) => DefineComponent<Props & FormFcPorps, RawBindings, {}, {}, {}, {}, {}, Emits>;
+
+const formFunctionComponent = (options: any) => {
+  const propsF = ["placeholder", "disabled", "clearable", "readonly"];
+  const { props, setup, ...others } = options;
+  return defineComponent({
+    ...others,
+    props: [...propsF, ...(props || [])],
+    setup(props: any, ctx: any) {
+      return setup(props, ctx, useModel(props, ctx.emit));
+    },
+  }) as any;
+};
 
 window.FC = functionComponent;
-
+window.FromFC = formFunctionComponent;
 declare global {
   const FC: FunctionComponent;
+  const FromFC: FormFunctionComponent;
   interface Window {
     FC: FunctionComponent;
+    FromFC: FormFunctionComponent;
   }
 }
 

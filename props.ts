@@ -6,29 +6,35 @@ import traverse from "@babel/traverse";
 
 import ts from "typescript";
 
-export default function transProps(src, id) {
-  const ast = parser.parse(src, {
-    sourceType: "module",
-    plugins: ["typescript", "jsx"],
-  });
-  traverse(ast, {
-    CallExpression(path) {
-      if (path.node.callee.name === "$FC") {
-        const propsAst = parser.parse('["a","b"]');
-        path.node.callee.name = "$FunctionComponent";
-        path.node.arguments.unshift(propsAst.program.body[0].expression);
-      }
-    },
-  });
-  console.log("%j", ast);
+export default function transProps(src: string, id: string) {
+  // console.log(id);
+  // console.time();
+  // const program = ts.createProgram([id], {});
+  // console.timeEnd();
+  // console.log(123456);
 
-  const res = generate(ast);
-  console.log(res);
-  return res;
+  // const ast = parser.parse(src, {
+  //   sourceType: "module",
+  //   plugins: ["typescript", "jsx"],
+  // });
+  // traverse(ast, {
+  //   CallExpression(path) {
+  //     if (path.node.callee.name === "$FC") {
+  //       const propsAst = parser.parse('["a","b"]');
+  //       path.node.callee.name = "$FunctionComponent";
+  //       path.node.arguments.unshift(propsAst.program.body[0].expression);
+  //     }
+  //   },
+  // });
+  // console.log("%j", ast);
+
+  // const res = generate(ast);
+  // console.log(res);
+  return src;
 }
 
-const createArrayExpression = ts.factory ? ts.factory.createArrayLiteralExpression : ts.createArrayLiteral;
-const createStringLiteral = ts.factory ? ts.factory.createStringLiteral : ts.createLiteral;
+const createArrayExpression = ts.factory.createArrayLiteralExpression;
+const createStringLiteral = ts.factory.createStringLiteral;
 
 export function transformer(program) {
   return (context) => (file) => visitNodeAndChildren(file, program, context);

@@ -4,6 +4,9 @@ import { BaseTableProps } from "types/table";
 import { computed, defineComponent, reactive, ref, watch, watchEffect } from "vue";
 import BaseForm from "./components/BaseForm";
 import { BaseFormConfig, BaseFormProps } from "./components/BaseForm/src/form";
+export interface AAA {
+  disabled: boolean;
+}
 
 const BB = defineComponent(function BB(props: { name: string }) {
   console.log(1235);

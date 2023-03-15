@@ -2,7 +2,7 @@
  * 表单组件
  *
  */
-import { WatchStopHandle, nextTick, onMounted, ref, watch, watchEffect } from "vue";
+import { WatchStopHandle, defineComponent, nextTick, onMounted, ref, watch, watchEffect } from "vue";
 // import FormItem from "./formItem";
 import { cloneDeep } from "lodash";
 
@@ -26,7 +26,7 @@ export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps
   // autoSize?: boolean;
 }
 
-export interface BaseFormProps<D = AnyObj> extends UseModelProps<D>, Partial<FormProps> {
+export interface BaseFormProps<D = AnyObj> extends Partial<FormProps> {
   config: BaseFormConfig<D>;
 }
 export interface BaseFormExpose extends FormInstance {
@@ -35,8 +35,6 @@ export interface BaseFormExpose extends FormInstance {
   /** 重新刷新options name 为需要刷新的那项 key 或者 prop */
   reloadOptions(name: string): void;
 }
-
-export type BaseFormEmits = UseModelEmits<AnyObj>;
 
 // config 默认值,
 const configDefault = {
@@ -47,14 +45,13 @@ const configDefault = {
   "label-suffix": ":",
   // size: "small",
 };
-export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
+
+export default FromFC<AnyObj, BaseFormProps, {}, BaseFormExpose>({
   name: "BaseForm",
   inheritAttrs: false,
-  props: ["config", "modelValue"],
-  setup(props, { expose, emit }) {
+  props: ["config"],
+  setup(props, { expose, attrs }, { value, emitValue }) {
     const elForm = ref<FormInstance>();
-
-    const { value, emitValue } = useModel(props, emit);
     const value_ = $(value);
     // form的配置项
     let config_: BaseFormConfig = $ref({ columns: [] });
@@ -111,7 +108,7 @@ export default FC<BaseFormProps, BaseFormEmits, BaseFormExpose>({
       return (
         <ElForm
           ref={elForm}
-          {...formProps}
+          {...attrs}
           class={[config_.size, "label-" + config_.labelPosition, "ml-form"]}
           model={value_}
         >

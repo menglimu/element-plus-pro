@@ -7,7 +7,7 @@ export default function myPlugin() {
     name: "transform-file",
     enforce: "pre",
     transform(src, id) {
-      if (fileRegex.test(id) && src.includes("$FC")) {
+      if (fileRegex.test(id) && src.includes("FC")) {
         const res = transProps(src, id);
         return {
           code: res.code,

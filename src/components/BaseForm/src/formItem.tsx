@@ -85,7 +85,6 @@ interface BaseFormItemProps {
   rootValue: AnyObj;
   rootConfig: BaseFormConfig;
   cbInput: (prop?: string, val?: unknown) => void;
-  "aaa:ac": string;
 }
 type BaseFormItemExpose = AnyObj & { relaodOptions: () => Promise<unknown> };
 export default FC<BaseFormItemProps, BaseFormItemExpose>({

@@ -14,17 +14,20 @@ export type UseModelEmits<V = unknown> = {
   "update:modelValue": (value: V) => void;
 };
 /** 监听 props 中的value 返回 拷贝的prop中的value 和 触发事件的方法 */
-export function useModel<T extends UseModelProps>(props: ReactiveVariable<T>, emit: Function) {
-  let propsValue: Ref<T["modelValue"]> = ref(props.modelValue);
+export function useModel<T extends UseModelProps>(
+  props: ReactiveVariable<T>,
+  emit: Function,
+  onValueChange?: (value: T["modelValue"]) => void
+) {
   let value: Ref<T["modelValue"]> = ref(cloneDeep(props.modelValue));
-  watch(() => props.modelValue, setValue);
-
-  function setValue() {
-    propsValue = ref(props.modelValue);
-    value = ref(cloneDeep(props.modelValue));
-    if (isEqual(propsValue.value, value.value)) return;
-    value.value = propsValue.value;
-  }
+  watch(
+    () => props.modelValue,
+    () => {
+      if (isEqual(props.modelValue, value.value)) return;
+      value.value = cloneDeep(props.modelValue);
+      onValueChange?.(value.value);
+    }
+  );
   function emitValue(val: T["modelValue"]) {
     value.value = val;
     emit?.("update:modelValue", cloneDeep(val));
