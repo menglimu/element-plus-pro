@@ -1,110 +1,164 @@
-import { isEqual, cloneDeep } from "lodash";
-import { isRef, Ref, ref, unref, UnwrapNestedRefs, watch, watchEffect, WatchStopHandle } from "vue";
-import { ReactiveVariable } from "vue/macros";
+import { cloneDeep } from "lodash";
+import merge from "@/utils/merge";
+import { BaseFormColumn } from "./formItem";
+import { FormItemRule } from "element-plus";
 
-export interface UseModelProps<V = unknown> {
-  modelValue?: V;
-  // onInput?: (value: V) => void;
-}
-// emit使用interface 会出现类型不符。interface 往 Record 赋值 报错
-// export interface UseModelEmits<V = unknown> {
-//   input: (value: V) => void;
-// }
-export type UseModelEmits<V = unknown> = {
-  "update:modelValue": (value: V) => void;
+export type BaseFormType = "text" | "textarea" | "select" | "radio" | "checkbox" | "date" | "dates" | "daterange" | "time" | "timerange" | "datetime" | "datetimerange" | "color" | "cascader";
+
+let componentsPreset: AnyObj = {
+  text: {
+    type: "text",
+    tag: "el-" + "input",
+    props: { type: "text" },
+  },
+  textarea: {
+    tag: "el-" + "input",
+    props: { textInput: true, type: "textarea", rows: 4 },
+  },
+  select: {
+    tag: "el-" + "select",
+    props: { popperAppendToBody: true },
+  },
+  radio: {
+    tag: "el-" + "radio-group",
+  },
+  checkbox: {
+    tag: "el-" + "checkbox-group",
+  },
+  date: {
+    tag: "el-" + "date-picker",
+  },
+  time: {
+    tag: "el-" + "time-picker",
+  },
 };
-/** 监听 props 中的value 返回 拷贝的prop中的value 和 触发事件的方法 */
-export function useModel<T extends UseModelProps>(
-  props: ReactiveVariable<T>,
-  emit: Function,
-  onValueChange?: (value: T["modelValue"]) => void
-) {
-  let value: Ref<T["modelValue"]> = ref(cloneDeep(props.modelValue));
-  watch(
-    () => props.modelValue,
-    () => {
-      if (isEqual(props.modelValue, value.value)) return;
-      value.value = cloneDeep(props.modelValue);
-      onValueChange?.(value.value);
+
+// 获取表单每一项的默认值
+// TODO 根据类型为每项设置初始值
+// TODO 根据columns生成D的定义
+export function getValByType(column: BaseFormColumn) {
+  if (column.hasOwnProperty("value")) {
+    return cloneDeep(column.value);
+  }
+}
+
+// 设置组件内的默认属性
+function getPreset(config: BaseFormColumn) {
+  // 根据不同类型，匹配不同默认配置，多种类型共用一个配置的情况
+  let defaultConfig: BaseFormColumn = { props: {} };
+
+  // 没有类型时。默认为input输入框
+  if (!(config.type || config.tag || config.render)) {
+    defaultConfig = componentsPreset["text"];
+  }
+  defaultConfig.props = defaultConfig.props || {};
+
+  if (config.type) {
+    if (["date", "dates", "daterange", "datetime", "datetimerange"].includes(config.type)) {
+      defaultConfig = componentsPreset[config.type] || componentsPreset["date"];
+      defaultConfig.props = { type: config.type };
+    } else if (["time", "timerange"].includes(config.type)) {
+      defaultConfig = componentsPreset[config.type] || componentsPreset["time"];
+      defaultConfig.props = { type: config.type };
+    } else {
+      defaultConfig = componentsPreset[config.type] || {};
     }
-  );
-  function emitValue(val: T["modelValue"]) {
-    value.value = val;
-    emit?.("update:modelValue", cloneDeep(val));
-  }
-  return { emitValue, value };
-}
 
-/** 选项各字段对应的key的名字 */
-interface PropNames {
-  label: string;
-  value: string;
-  children?: string;
-  disabled?: string;
-  isLeaf?: string;
-}
-
-export interface UseOptionsProps<O = AnyObj> {
-  /** 下拉，单选多选等数据的选项 */
-  options?: Array<O>;
-  /** 异步获取的数据选项函数 */
-  optionsGet?: () => Promise<{ content: O[] } | O[] | { data: O[] }>;
-  /** label,value 等选项各字段对应的key的名字 */
-  propNames?: PropNames;
-}
-/** 监听 */
-export function useOptions<T extends UseOptionsProps>(props: T | Ref<T>, needTransName = true) {
-  const options = ref<AnyObj[]>([]);
-  if (isRef(props)) {
-    let optionsWt: WatchStopHandle;
-    let optionsGetWt: WatchStopHandle;
-    watch(
-      props,
-      () => {
-        optionsWt?.();
-        optionsGetWt?.();
-        props.value.options && (optionsWt = watchEffect(() => (options.value = props.value.options || [])));
-        props.value.optionsGet && (optionsGetWt = watchEffect(relaodOptions));
-      },
-      { immediate: true }
-    );
-  } else {
-    watchEffect(() => (options.value = props.options || []));
-    watchEffect(relaodOptions);
-  }
-
-  // watchEffect(() => {
-  //   options.value = props.options || [];
-  //   console.log(1234, options);
-  // });
-
-  async function relaodOptions() {
-    const props_ = unref(props);
-    if (typeof props_.optionsGet === "function") {
-      const res = await props_.optionsGet();
-      let arry: AnyObj[] = [];
-      if (Array.isArray(res)) {
-        arry = res;
-      } else if ("content" in res && Array.isArray(res.content)) {
-        arry = res.content;
-      } else if ("data" in res && Array.isArray(res.data)) {
-        arry = res.data;
+    // 时间，日期的数据初始化
+    if (["time", "timerange"].includes(config.type)) {
+      defaultConfig.props!["value-format"] = "HH:mm:ss";
+      if (config.type === "timerange") {
+        defaultConfig.props!["is-range"] = true;
       }
-      if (needTransName) {
-        arry = trans(arry, props_.propNames);
-      }
-      options.value = arry;
+    } else if (["date", "dates", "daterange"].includes(config.type)) {
+      defaultConfig.props!["value-format"] = "yyyy-MM-dd";
+    } else if (["datetime", "datetimerange"].includes(config.type)) {
+      defaultConfig.props!["value-format"] = "yyyy-MM-dd HH:mm:ss";
+    }
+    if (["datetimerange"].includes(config.type)) {
+      defaultConfig.props!["default-time"] = ["00:00:00", "23:59:59"];
+    }
+
+    if (["datetimerange", "daterange"].includes(config.type)) {
+      defaultConfig.props!["range-separator"] = "至";
+      defaultConfig.props!["start-placeholder"] = "开始时间";
+      defaultConfig.props!["end-placeholder"] = "结束时间";
     }
   }
-
-  function trans(arry: AnyObj[], propNames?: PropNames) {
-    if (Array.isArray(arry) && propNames) {
-      arry.forEach((item) => {
-        item.lable = item[propNames.label];
-      });
-    }
-    return arry;
-  }
-
-  return { options, relaodOptions };
+  return defaultConfig;
 }
+// 设置表单项的校验规则
+function getRules(config: BaseFormColumn) {
+  // 因为空校验和错误校验，UI颜色区别，所以要实时判空的原因，将所有的校验trigger修改为change
+  const prefix = getPrefix(config.type);
+  let trigger = getTrigger(prefix);
+
+  // 生成默认的一些校验规则
+  const rules: Array<FormItemRule> = [];
+  if (config.props?.minlength !== undefined) {
+    rules.push({
+      pattern: new RegExp(`^(.|\n){${config.props.minlength},}$`),
+      // min: config.minlength,
+      message: `不能少于${config.props.minlength}个字`,
+      trigger: trigger,
+    });
+  }
+  if (config.props?.maxlength !== undefined) {
+    rules.push({
+      pattern: new RegExp(`^(.|\n){0,${config.props.maxlength}}$`),
+      // max: config.maxlength,
+      message: `不能大于${config.props.maxlength}个字`,
+      trigger: trigger,
+    });
+  }
+  if (config.reg) {
+    rules.push({
+      pattern: new RegExp(config.reg), // /^\[\d+,\d+\]$/
+      message: `${config.label}${prefix}有误`,
+      trigger: trigger,
+    });
+  }
+  return config.rules ? rules.concat(config.rules) : rules;
+}
+
+// 根据类型获取是输入还是选择的
+export function getPrefix(type?: BaseFormType) {
+  let placeholderPrefix = "输入";
+
+  if (type && ["date", "dates", "daterange", "datetime", "datetimerange", "time", "timerange", "select", "tree", "cascader"].includes(type)) {
+    placeholderPrefix = "选择";
+  }
+  return placeholderPrefix;
+}
+export function getTrigger(prefix: string) {
+  return "change";
+}
+// 获取表单某项的配置
+export function getFormColumn(config: BaseFormColumn): BaseFormColumn {
+  // 设置组件内的默认属性
+  let base: BaseFormColumn = getPreset(config);
+  // 初始化正则验证及提示
+  if (config.label) {
+    const prefix = getPrefix(config.type);
+    base.placeholder = `请${prefix}${config.label}`;
+  }
+  const config_ = merge(base, config);
+  // 通过config类型，初始化规则和匹配预设组件默认值
+  config_.rules = getRules(config);
+  return config_;
+}
+
+// 根据表单的配置项，获取当前表单的默认值
+// export function getDefaultValue(columns: Array<BaseFormColumn>) {
+//   // const list = config_.columns.filter(item => item.type !== 'special')
+//   const defaultValue: AnyObj = {};
+//   columns?.forEach((column) => {
+//     if (column.prop) {
+//       const val = getValByType(column);
+//       if (val !== undefined) {
+//         defaultValue[column.prop] = val;
+//       }
+//     }
+//   });
+//   return cloneDeep(defaultValue);
+// }

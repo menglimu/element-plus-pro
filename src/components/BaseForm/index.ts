@@ -7,3 +7,4 @@
  */
 
 export { default } from "./src/form";
+export { default as FormItem } from "./src/formItem";

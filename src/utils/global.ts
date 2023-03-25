@@ -1,4 +1,4 @@
-import { UseModelEmits, UseModelProps, useModel } from "@/components/BaseForm/src/utils";
+import { UseModelEmits, UseModelProps, useModel } from "@/components/BaseForm/hooks/useModel";
 import {
   Component,
   DefineComponent,
@@ -35,7 +35,7 @@ interface SetupCtx<RawBindings, Emits> {
   expose: (exposed: RawBindings) => void;
 }
 
-interface ComponentOptionsBase<Props, Emits, RawBindings> {
+interface ComponentOptionsBase<Props, RawBindings, Emits> {
   name?: string;
   inheritAttrs?: boolean;
   props?: UnionToTuple<keyof Props> | (keyof Props)[];
@@ -48,20 +48,20 @@ interface ComponentOptionsBase<Props, Emits, RawBindings> {
   directives?: Record<string, Directive>;
   serverPrefetch?(): Promise<any>;
 }
-type FunctionComponent = <Props extends AnyObj = {}, Emits extends EmitsOptions = {}, RawBindings extends AnyObj = {}>(
-  options: ComponentOptionsBase<Props, Emits, RawBindings>
+type FunctionComponent = <Props extends AnyObj = {}, RawBindings extends AnyObj = {}, Emits extends EmitsOptions = {}>(
+  options: ComponentOptionsBase<Props, RawBindings, Emits>
 ) => DefineComponent<Props, RawBindings, {}, {}, {}, {}, {}, Emits>;
 
 const functionComponent = (options: any) => defineComponent(options) as any;
 
-interface FormFcPorps {
+export interface FormFcProps<V = unknown> extends UseModelProps<V> {
   placeholder?: string;
   disabled?: boolean;
   clearable?: boolean;
   readonly?: boolean;
 }
-interface ComponentOptionsForm<V, Props, Emits, RawBindings>
-  extends Omit<ComponentOptionsBase<Props, Emits, RawBindings>, "setup"> {
+interface ComponentOptionsForm<V, Props, RawBindings, Emits>
+  extends Omit<ComponentOptionsBase<Props, RawBindings, Emits>, "setup"> {
   setup: (
     props: Readonly<Props>,
     ctx: SetupCtx<RawBindings, Emits>,
@@ -74,14 +74,14 @@ interface ComponentOptionsForm<V, Props, Emits, RawBindings>
 type FormFunctionComponent = <
   V = unknown,
   Props extends AnyObj = {},
-  Emits extends EmitsOptions = {},
-  RawBindings extends AnyObj = {}
+  RawBindings extends AnyObj = {},
+  Emits extends EmitsOptions = {}
 >(
-  options: ComponentOptionsForm<V, Props & FormFcPorps & UseModelProps<V>, Emits & UseModelEmits<V>, RawBindings>
-) => DefineComponent<Props & FormFcPorps, RawBindings, {}, {}, {}, {}, {}, Emits>;
+  options: ComponentOptionsForm<V, Props & FormFcProps<V>, RawBindings, Emits & UseModelEmits<V>>
+) => DefineComponent<Props & FormFcProps<V>, RawBindings, {}, {}, {}, {}, {}, Emits>;
 
 const formFunctionComponent = (options: any) => {
-  const propsF = ["placeholder", "disabled", "clearable", "readonly"];
+  const propsF = ["placeholder", "disabled", "clearable", "readonly", "modelValue"];
   const { props, setup, ...others } = options;
   return defineComponent({
     ...others,

@@ -1,18 +1,26 @@
 /**
  * 表单组件
+ * done 多个联动组件的demo
+ * done 一个组件输出多个值的时候的处理
+ * done 组件rootValue是否拷贝
+ * fail 自定义组件内进行校验
+ * done 自定义组件内进行初始化
+ *
+ *
  *
  */
-import { WatchStopHandle, defineComponent, nextTick, onMounted, ref, watch, watchEffect } from "vue";
+import { nextTick, onMounted, provide, ref, watchEffect } from "vue";
 // import FormItem from "./formItem";
 import { cloneDeep } from "lodash";
 
-import merge from "@/utils/merge";
 import "./form.scss";
 import { ElForm, FormInstance, FormProps } from "element-plus";
-import FormItem, { BaseFormColumn } from "./formItem";
-import { useModel, UseModelEmits, UseModelProps } from "./utils";
-import { ReactiveVariable } from "vue/macros";
-// import style from 'index.module.scss'
+import FormItem, { BaseFormColumn, BaseFormItemExpose } from "./formItem";
+import { UseModelEmits, UseModelProps, useModel } from "../hooks/useModel";
+import { emitFormValueKey, emitItemInitValueKey, formConfigKey, formValueKey } from "../keys";
+
+// 将elform所有属性放在config中而不是直接在prop中。主要是为了方便监听elformProp中的项。防止触发太频繁
+// 其他方案，考虑通过toRefs将所有props进行转换
 
 /** 表单的配置项,D为输出的data对象的类型 */
 export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps>> {
@@ -20,15 +28,14 @@ export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps
   columns: Array<BaseFormColumn<D>>;
   /** 是否显示清除按钮 */
   clearable?: boolean;
-  /** 自适应表单大小
-   * @default false
-   */
-  // autoSize?: boolean;
+  /** 是否只读 */
+  readonly?: boolean;
 }
 
-export interface BaseFormProps<D = AnyObj> extends Partial<FormProps> {
+export interface BaseFormProps<D = AnyObj> extends UseModelProps<D> {
   config: BaseFormConfig<D>;
 }
+
 export interface BaseFormExpose extends FormInstance {
   /** 重置初始值 */
   reset(): void;
@@ -36,50 +43,57 @@ export interface BaseFormExpose extends FormInstance {
   reloadOptions(name: string): void;
 }
 
-// config 默认值,
-const configDefault = {
+// elform 的 默认值,
+const elformDefault = {
   inline: true,
-  labelWidth: "100px",
-  // uiType: 'round',
   clearable: true,
-  "label-suffix": ":",
-  // size: "small",
+  labelWidth: "100px",
+  labelSuffix: ":",
 };
 
-export default FromFC<AnyObj, BaseFormProps, {}, BaseFormExpose>({
+export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
   name: "BaseForm",
   inheritAttrs: false,
-  props: ["config"],
-  setup(props, { expose, attrs }, { value, emitValue }) {
+  props: ["config", "modelValue"],
+  setup(props, { expose, emit }) {
     const elForm = ref<FormInstance>();
+    const { value, emitValue } = useModel(props, emit);
     const value_ = $(value);
-    // form的配置项
-    let config_: BaseFormConfig = $ref({ columns: [] });
-    // 初始值
-    let initValue = {};
 
+    // 初始值。初始化时候的值，columns 改变的时候，会重置该值
+    let initValue = $ref<AnyObj>({});
+
+    const refs: { [k in string]: BaseFormItemExpose | null } = {};
+
+    let config_ = $shallowRef<BaseFormConfig>();
+    let elformProps = $ref<Partial<FormProps>>();
     // 初始化值
-    watchEffect(() => Object.assign(config_, configDefault, props.config));
-    watch(
-      () => config_.columns,
-      () => {
-        console.log("columns change");
-        initValue = getDefaultValue(config_);
-        emitValue({ ...initValue, ...value_ });
-      },
-      { deep: true, immediate: true }
-    );
+    watchEffect(() => {
+      const { clearable, readonly, columns, ...other } = props.config;
+      elformProps = Object.assign({}, elformDefault, other);
+      config_ = Object.assign({}, elformDefault, props.config);
+    });
+
+    // 根据key设置表单的初始值
+    function emitFormDefaultValue(value: any, prop: string) {
+      prop && (initValue[prop] = value);
+    }
+    watchEffect(() => {
+      emitValue({ ...initValue, ...value_ });
+    });
+
+    provide(formValueKey, $$(value_!));
+    provide(emitFormValueKey, emitFormValue);
+    provide(emitItemInitValueKey, emitFormDefaultValue);
+    provide(formConfigKey, $$(config_));
 
     onMounted(() => {
       // 重写form的 resetFields
       expose({ reset, ...elForm.value!, resetFields: reset, reloadOptions });
     });
-
-    // useAutoSize(config);
-
-    // TODO 重新加载options
+    // reloadOptions 使用场景不多 先注释掉
     function reloadOptions(name: string) {
-      // ($refs?.[name] as any)?.onOptionsGetChange?.();
+      refs?.[name]?.relaodOptions?.();
     }
 
     // 重置初始值
@@ -87,7 +101,6 @@ export default FromFC<AnyObj, BaseFormProps, {}, BaseFormExpose>({
       emitValue(cloneDeep(initValue));
       clearValidate();
     }
-    // 验证数据 使用表单默认的验证
 
     // 使用change的时候。需要将清除延后
     async function clearValidate(props?: string | string[]) {
@@ -96,82 +109,26 @@ export default FromFC<AnyObj, BaseFormProps, {}, BaseFormExpose>({
     }
 
     // 监听值改变设置某一项value_的值
-    function onItemInput(prop?: string, value?: any) {
+    function emitFormValue(value?: any, prop?: string) {
       if (!prop || !value_) return;
       value_[prop] = value;
       emitValue(value_);
     }
 
-    return () => {
-      // 通过解构。将所有用户属性解构到form中
-      const { columns, clearable, ...formProps } = config_;
-      return (
-        <ElForm
-          ref={elForm}
-          {...attrs}
-          class={[config_.size, "label-" + config_.labelPosition, "ml-form"]}
-          model={value_}
-        >
-          {columns.map((item, index) => {
-            return (
-              <FormItem
-                key={item.key || item.prop || index}
-                configItem={item}
-                rootValue={value_!}
-                rootConfig={config_}
-                cbInput={onItemInput}
-              />
-            );
-          })}
-        </ElForm>
-      );
-    };
+    return () => (
+      <ElForm ref={elForm} {...elformProps} class={["ml-form"]} model={value_}>
+        {props.config?.columns.map((item, index) => {
+          return (
+            <FormItem
+              configItem={item}
+              // reloadOptions 使用场景不多 先注释掉
+              // ref={(el: any) => {
+              //   refs[item.prop || index] = el;
+              // }}
+            />
+          );
+        })}
+      </ElForm>
+    );
   },
 });
-
-// function useAutoSize(config: BaseFormConfig) {
-//   onMounted(() => {
-//     if (config.autoSize) {
-//       getSize();
-//       window.onresize = debounce(getSize, 200);
-//     }
-//   });
-
-//   // 自动size相关
-//   // TODO: 自动设置 个元素的默认宽度 itemBoxWidth
-
-//   function getSize() {
-//     const Width =
-//       window.innerWidth || // 浏览器窗口的内部宽度（包括滚动条）
-//       document.documentElement.clientWidth ||
-//       document.body.clientWidth;
-//     let size: "small" | "mini" | "medium" | "large" | undefined;
-//     if (Width < 1366) {
-//       size = "mini";
-//     } else if (Width < 1600) {
-//       size = "small";
-//     } else if (Width < 1680) {
-//       size = "medium";
-//     }
-//     config.size = size;
-//   }
-// }
-
-// 获取选项默认值
-function getDefaultValue(config: BaseFormConfig) {
-  // const list = config_.columns.filter(item => item.type !== 'special')
-  const defaultValue: AnyObj = {};
-  config.columns.forEach((column) => {
-    if (column.prop) {
-      defaultValue[column.prop] = getValByType(column);
-    }
-  });
-  // 注释掉一些初始值的处理。代码尽量简洁
-  function getValByType(column: BaseFormColumn) {
-    if (column.hasOwnProperty("value")) {
-      return column.value;
-    }
-    return null;
-  }
-  return cloneDeep(defaultValue);
-}

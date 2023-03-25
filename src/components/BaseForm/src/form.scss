@@ -1,168 +1,27 @@
 // 因为权重覆盖了disable的样式。放到外面来
-.round,
-.line,
-.border {
-  .el-input__inner {
-    background: none;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .el-textarea__inner {
-    border: 0;
-    border-radius: 0;
-  }
-}
 
 .ml-form {
   display: flex;
   flex-wrap: wrap;
-
-  &.line {
-    .el-input__inner,
-    .el-textarea {
-      border-bottom: 1px solid #d8e0e6;
-    }
-  }
-
-  &.border {
-    .el-input__inner,
-    .el-textarea {
-      border: 1px solid #d8e0e6;
-    }
-  }
-  // label的位置
-  &.label-left {
-    .el-form-item__label {
-      text-align: left;
-    }
-  }
-
-  &.label-right {
-    .el-form-item__label {
-      text-align: right;
-    }
-  }
-
-  &.label-center {
-    .el-form-item__label {
-      text-align: center;
-    }
-  }
-
-  &.label-top {
-    .ml-form-item {
-      flex-wrap: wrap;
-
-      .el-form-item__label {
-        width: 100%;
-        padding-bottom: 4px;
-        line-height: 22px;
-      }
-    }
-  }
-
-  .ml-form-item-box {
-    box-sizing: border-box;
-    display: flex;
-    padding: 0 15px;
-
-    &.hide {
-      display: none !important;
-    }
-
-    .ml-form-item {
-      display: flex;
-      width: 100%;
+  &.el-form--inline {
+    .el-form-item {
+      width: 25%;
       margin-right: 0;
-
-      &.ml-form-item-block {
-        max-width: none;
-      }
-
-      &.hide {
-        display: none !important;
-      }
-      // 重写表单元素的弹窗样式
-      .el-dialog__wrapper {
-        .el-input__inner,
-        .el-input__inner:focus,
-        .el-textarea__inner,
-        .el-textarea__inner:focus {
-          border-color: #d8e0e6;
-        }
-      }
-
-      .el-form-item__label {
-        flex-shrink: 0;
-        padding: 0 10px 0 0;
-      }
-
-      .el-form-item__content {
-        flex: 1;
-        margin-left: 0 !important;
-      }
     }
-  }
-
-  &.round {
-    &:not(.label-top) {
-      .ml-form-item-box:not(.hide-round) {
-        .ml-form-item {
-          box-sizing: border-box;
-          background: #fff;
-          border-radius: 20px;
-          box-shadow: 2px 2px 5px #dad3d3;
-
-          .el-form-item__label {
-            background: #f1f5f7;
-            border-radius: 20px 0 0 20px;
-          }
-
-          &:hover {
-            .el-form-item__label {
-              background: #e9f1f5;
-            }
-          }
-        }
-      }
-    }
-
-    &.label-top {
-      .ml-form-item-box:not(.hide-round) {
-        .el-form-item__content {
-          box-sizing: border-box;
-          background: #fff;
-          border-radius: 20px;
-          box-shadow: 2px 2px 5px #dad3d3;
-        }
-      }
+    .base-form-item-block {
+      width: 100%;
     }
   }
 
   // 下面是各个组件的单独样式
   .el-date-editor.el-input,
-  .el-date-editor.el-input__inner {
-    width: 100%;
-  }
-
-  .el-tree {
-    width: 100%;
-  }
-
+  .el-date-editor.el-input__inner,
+  .el-tree,
   .el-select {
-    display: block;
-  }
-
-  .ml-form-color .el-color-picker {
-    float: left;
+    width: 100%;
   }
 
   .el-color-picker__trigger {
     width: 80px;
-  }
-
-  .ml-form-item-block {
-    display: flex;
   }
 }
