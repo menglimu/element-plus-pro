@@ -1,6 +1,6 @@
 import { InjectionKey, Ref } from "vue";
-import { BaseFormConfig } from "../src/form";
-import { BaseFormColumn } from "../src/formItem";
+import { BaseFormConfig } from "../src/Form";
+import { BaseFormColumn } from "../src/FormItem";
 
 export const formValueKey: InjectionKey<Ref<AnyObj>> = Symbol("formValueKey");
 export const formConfigKey: InjectionKey<Ref<BaseFormConfig>> = Symbol("formConfigKey");

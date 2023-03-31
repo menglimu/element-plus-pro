@@ -3,7 +3,7 @@ import { ElButton } from "element-plus";
 import { BaseTableProps } from "types/table";
 import { computed, defineComponent, reactive, ref, watch, watchEffect } from "vue";
 import BaseForm from "./components/BaseForm";
-import { BaseFormConfig, BaseFormProps } from "./components/BaseForm/src/form";
+import { BaseFormConfig, BaseFormProps } from "./components/BaseForm/src/Form";
 import BaseFormDemo from "@/components/BaseForm/demo";
 export interface AAA {
   disabled: boolean;

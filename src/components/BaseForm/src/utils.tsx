@@ -1,6 +1,6 @@
 import { cloneDeep } from "lodash";
 import merge from "@/utils/merge";
-import { BaseFormColumn } from "./formItem";
+import { BaseFormColumn } from "./FormItem";
 import { FormItemRule } from "element-plus";
 
 export type BaseFormType = "text" | "textarea" | "select" | "radio" | "checkbox" | "date" | "dates" | "daterange" | "time" | "timerange" | "datetime" | "datetimerange" | "color" | "cascader";

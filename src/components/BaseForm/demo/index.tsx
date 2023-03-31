@@ -5,7 +5,7 @@
 
 import { ElButton, InputInstance } from "element-plus";
 import BaseForm from "..";
-import { BaseFormConfig, BaseFormExpose } from "../src/form";
+import { BaseFormConfig, BaseFormExpose } from "../src/Form";
 import Children from "./Children";
 import { ref } from "vue";
 

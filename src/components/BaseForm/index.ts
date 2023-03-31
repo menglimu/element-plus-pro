@@ -6,5 +6,5 @@
  * @Description: 导出组件
  */
 
-export { default } from "./src/form";
-export { default as FormItem } from "./src/formItem";
+export { default } from "./src/Form";
+export { default as FormItem } from "./src/FormItem";

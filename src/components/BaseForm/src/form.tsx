@@ -15,7 +15,7 @@ import { cloneDeep } from "lodash";
 
 import "./form.scss";
 import { ElForm, FormInstance, FormProps } from "element-plus";
-import FormItem, { BaseFormColumn, BaseFormItemExpose } from "./formItem";
+import FormItem, { BaseFormColumn, BaseFormItemExpose } from "./FormItem";
 import { UseModelEmits, UseModelProps, useModel } from "../hooks/useModel";
 import { emitFormValueKey, emitItemInitValueKey, formConfigKey, formValueKey } from "../keys";
 
@@ -69,9 +69,9 @@ export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
     let elformProps = $ref<Partial<FormProps>>();
     // 初始化值
     watchEffect(() => {
-      const { clearable, readonly, columns, ...other } = props.config;
-      elformProps = Object.assign({}, elformDefault, other);
       config_ = Object.assign({}, elformDefault, props.config);
+      const { clearable, readonly, columns, ...other } = config_;
+      elformProps = other;
     });
 
     // 根据key设置表单的初始值
@@ -117,7 +117,7 @@ export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
 
     return () => (
       <ElForm ref={elForm} {...elformProps} class={["ml-form"]} model={value_}>
-        {props.config?.columns.map((item, index) => {
+        {props.config?.columns.map((item) => {
           return (
             <FormItem
               configItem={item}
