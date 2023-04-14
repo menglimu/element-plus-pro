@@ -33,10 +33,7 @@ export function useOptions<T extends UseOptionsProps>(props: T | Ref<T>, needTra
       () => {
         optionsWt?.();
         optionsGetWt?.();
-        props.value.options &&
-          (optionsWt = watchEffect(() =>
-            isRef(props.value.options) ? (options = props.value.options) : (options.value = props.value.options || [])
-          ));
+        props.value.options && (optionsWt = watchEffect(() => (isRef(props.value.options) ? (options = props.value.options) : (options.value = props.value.options || []))));
         props.value.optionsGet && (optionsGetWt = watchEffect(relaodOptions));
       },
       { immediate: true }
@@ -46,14 +43,8 @@ export function useOptions<T extends UseOptionsProps>(props: T | Ref<T>, needTra
     watchEffect(relaodOptions);
   }
 
-  // watchEffect(() => {
-  //   options.value = props.options || [];
-  //   console.log(1234, options);
-  // });
-
   async function relaodOptions() {
     const props_ = unref(props);
-    console.log(48534);
     if (typeof props_.optionsGet === "function") {
       const res = await props_.optionsGet();
       let arry: AnyObj[] = [];

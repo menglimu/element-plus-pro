@@ -72,16 +72,12 @@ export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
     let elformProps = $ref<Partial<FormProps>>();
     // 初始化值
     watchEffect(() => {
-      console.log("config change");
       config_ = Object.assign({}, elformDefault, props.config);
       const { clearable, readonly, width, columns, ...other } = config_;
       elformProps = other;
     });
     watchEffect(() => {
       emitValue({ ...initValue, ...value_ });
-    });
-    watch([() => props.config.columns], () => {
-      console.log("xxx");
     });
 
     // 根据key设置表单的初始值

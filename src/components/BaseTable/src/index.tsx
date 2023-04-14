@@ -8,9 +8,9 @@ import { Ref, UnwrapNestedRefs, onMounted, reactive, ref, toRef, watchEffect } f
 import TablePagination from "../components/TablePagination";
 import { BaseTableOuterBtn, useOuterBtn } from "../components/TableButton";
 import TableSearch, { BaseTableSearchExpose, BaseTableSearchProps } from "../components/TableSearch";
-import "./table.scss";
 import TableContent, { BaseTableConfig } from "../components/TableContent";
 import { BaseFormExpose } from "@/components/BaseForm/src/Form";
+import "./table.scss";
 
 export type FetchListFn = (type?: "" | "search" | "reset" | "init" | "refresh" | "size" | "current", data?: AnyObj) => Promise<void>;
 interface ResponseData<D = AnyObj> {
@@ -168,14 +168,10 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
         const rowKey = props.config.rowKey;
         let ids: string = rows.map((_) => _[typeof rowKey === "function" ? rowKey(_) : rowKey!]).join(",");
 
-        try {
-          await ElMessageBox.confirm("此操作将永久删除该数据, 是否继续?");
-          await props.api?.delete(ids, rows);
-          refresh();
-          ElMessage.success("删除成功");
-        } catch (error) {
-          console.log(error);
-        }
+        await ElMessageBox.confirm("此操作将永久删除该数据, 是否继续?");
+        await props.api?.delete(ids, rows);
+        refresh();
+        ElMessage.success("删除成功");
       }
     }
 

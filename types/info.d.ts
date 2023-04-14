@@ -1,6 +1,3 @@
-import { CreateElement, VNode } from "vue/types/umd";
-import { MlOptions } from "./common";
-import { MlTableType } from "../src/components/BaseTable/src/table";
 import { VNodeChild } from "vue";
 
 interface MlInfoProps<D = AnyObj> {

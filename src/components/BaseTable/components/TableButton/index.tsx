@@ -1,8 +1,7 @@
-import { getIcon, getJudge } from "@/utils";
-import { ButtonProps, ElButton, ElMessage, ElMessageBox, ElTableColumn } from "element-plus";
-import { Ref, VNodeChild, getCurrentInstance } from "vue";
+import { getJudge } from "@/utils";
+import { ElTableColumn } from "element-plus";
+import { Ref, VNodeChild } from "vue";
 import { TableColumnCtx } from "element-plus/es/components/table/src/table-column/defaults";
-import { BaseTableProps } from "../../src";
 import { BaseTableConfig } from "../TableContent";
 import ButtonGroup, { GroupButton } from "@/components/ButtonGroup";
 
@@ -11,15 +10,6 @@ const columnDefaultControl = {
   label: "操作",
   fixed: "right",
 };
-
-interface TableButton extends Partial<ButtonProps> {
-  /** 按钮内的文字 */
-  name?: string;
-  /** 触发的事件类型 */
-  evtType?: "mldelete";
-  /** svg图标，参考svg-icon的实现。 el- 开头表示 element的图标  */
-  icon?: string;
-}
 
 type ColumnRender = (scoped: { row: AnyObj; column: TableColumnCtx<AnyObj>; $index: number }) => VNodeChild;
 

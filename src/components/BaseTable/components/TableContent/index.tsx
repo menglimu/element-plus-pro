@@ -1,6 +1,5 @@
-import { getIcon, getJudge } from "@/utils";
-import { ElButton, ElTable, ElTableColumn } from "element-plus";
-import { Ref, VNode, onMounted, ref, watchEffect } from "vue";
+import { ElTable, ElTableColumn } from "element-plus";
+import { Ref, VNode } from "vue";
 import { BaseTableSelfType, getFormatters } from "./config";
 import { BaseTableInnerBtn, useInnerBtn } from "../TableButton";
 import { TableProps } from "element-plus/es/components/table/src/table/defaults";

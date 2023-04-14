@@ -21,8 +21,6 @@ export default FromFC<unknown, IProps>({
     const emitFormItemInitValue = inject(emitFormItemInitValueKey);
     const emitFormValue = inject(emitFormValueKey);
 
-    console.log(formItemConfig, 123);
-
     const valKey = formItemConfig?.prop;
     const unitKey = `${formItemConfig?.prop}Unit`;
     emitFormItemInitValue?.("中文", unitKey);
@@ -37,17 +35,8 @@ export default FromFC<unknown, IProps>({
     }, 10000);
     return () => (
       <div>
-        <el-input
-          modelValue={valKey ? formValue?.[valKey] : props.modelValue}
-          onInput={(val: string) => emitFormValue?.(val, valKey)}
-        ></el-input>
-        <el-select
-          modelValue={formValue?.[unitKey]}
-          class="m-2"
-          placeholder="Select"
-          size="large"
-          onChange={(val: string) => emitFormValue?.(val, unitKey)}
-        >
+        <el-input modelValue={valKey ? formValue?.[valKey] : props.modelValue} onInput={(val: string) => emitFormValue?.(val, valKey)}></el-input>
+        <el-select modelValue={formValue?.[unitKey]} class="m-2" placeholder="Select" size="large" onChange={(val: string) => emitFormValue?.(val, unitKey)}>
           {["中国", "日本", "美国"].map((item) => (
             <el-option key={item} label={item} value={item} />
           ))}
