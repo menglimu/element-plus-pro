@@ -1,6 +1,7 @@
 import { CreateElement, VNode } from "vue/types/umd";
 import { MlOptions } from "./common";
-import { MlTableType } from "./table";
+import { MlTableType } from "../src/components/BaseTable/src/table";
+import { VNodeChild } from "vue";
 
 interface MlInfoProps<D = AnyObj> {
   /** 整体标题 */
@@ -43,7 +44,7 @@ interface MlInfoColumn<D = AnyObj> extends MlOptions {
   /** 数据项的类名 */
   className?: string;
   /** 格式处理函数 */
-  formatter?: (value: string, data: D) => string | VNode | Element;
+  formatter?: (value: string, data: D) => string;
   /** 自定义显示 */
-  render?: (h: CreateElement, value: string, data: D, item: MlInfoColumn<D>) => VNode | Element;
+  render?: (value: string, data: D, item: MlInfoColumn<D>) => VNodeChild;
 }

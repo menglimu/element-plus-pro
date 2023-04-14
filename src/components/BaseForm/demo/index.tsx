@@ -7,7 +7,7 @@ import { ElButton, InputInstance } from "element-plus";
 import BaseForm from "..";
 import { BaseFormConfig, BaseFormExpose } from "../src/Form";
 import Children from "./Children";
-import { ref } from "vue";
+import { reactive, ref, shallowReactive, shallowRef } from "vue";
 
 interface IProps {}
 
@@ -21,7 +21,8 @@ export default FC<IProps>({
     const formItem = ref();
     const children = ref();
     let a = 1;
-    let formConfig: BaseFormConfig = $shallowRef({
+
+    let formConfig: BaseFormConfig = shallowReactive({
       disabled: false,
       columns: [
         {
@@ -54,26 +55,28 @@ export default FC<IProps>({
             console.log(rootValue.a == "23");
             return rootValue.a == "23";
           },
-          optionsGet: () => {
-            console.log(1234);
-            a++;
-            return a === 3
-              ? Promise.resolve([
-                  { label: "1", value: "1" },
-                  { label: "2", value: "2" },
-                  { label: "3", value: "3" },
-                ])
-              : Promise.resolve([{ label: "1", value: "1" }]);
-          },
+          // optionsGet: () => {
+          //   console.log(1234);
+          //   a++;
+          //   return a === 3
+          //     ? Promise.resolve([
+          //         { label: "1", value: "1" },
+          //         { label: "2", value: "2" },
+          //         { label: "3", value: "3" },
+          //       ])
+          //     : Promise.resolve([{ label: "1", value: "1" }]);
+          // },
         },
         { label: "自定义", prop: "aas", render: () => <Children ref={children} ref_for /> },
       ],
     });
     function cbOption() {
       console.log(formItem?.value, children?.value, formConfig.columns[0].props?.ref);
-      baseForm.value?.reloadOptions("select");
+      // baseForm.value?.reloadOptions("select");
+      formConfig.labelSuffix = "sss";
       aaa.value.push({ label: "2", value: "2" });
       if (formConfig) {
+        formConfig.labelSuffix += 2;
         formConfig.columns.push({
           label: "选择2",
           prop: "select1111",

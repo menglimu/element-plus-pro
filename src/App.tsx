@@ -1,10 +1,11 @@
 // import { ElButton } from "element-plus";
 import { ElButton } from "element-plus";
-import { BaseTableProps } from "types/table";
+import { BaseTableProps } from "@/components/BaseTable/src/table";
 import { computed, defineComponent, reactive, ref, watch, watchEffect } from "vue";
 import BaseForm from "./components/BaseForm";
 import { BaseFormConfig, BaseFormProps } from "./components/BaseForm/src/Form";
 import BaseFormDemo from "@/components/BaseForm/demo";
+import BaseTableDemo from "@/components/BaseTable/demo";
 export interface AAA {
   disabled: boolean;
 }
@@ -86,6 +87,7 @@ export default FC({
         {/* <ElButton icon={""}>22</ElButton>
         <el-button icon>xxx</el-button> */}
         <BaseFormDemo />
+        <BaseTableDemo />
       </div>
     );
   },

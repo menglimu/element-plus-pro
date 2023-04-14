@@ -2,7 +2,7 @@ import BaseForm from "@/components/BaseForm";
 import MlForm from "@/components/BaseForm";
 import { ElInput } from "element-plus";
 import { MlFormConfig } from "types/form";
-import { BaseTableProps } from "types/table";
+import { BaseTableProps } from "@/components/BaseTable/src/table";
 import { defineComponent, onMounted, ref, RenderFunction, SetupContext, toRefs, VNode } from "vue";
 import BaseTable from "./components/BaseTable";
 import Flow from "./components/Flow";
@@ -10,9 +10,7 @@ import Flow from "./components/Flow";
 // const a: SetupContext
 // import { $ref } from "vue/macros";
 
-function declareComponent<Props, RawBindings extends Record<string, any>>(
-  setup: (props: Readonly<Props>, expose: (exposed?: RawBindings) => void) => RenderFunction
-) {
+function declareComponent<Props, RawBindings extends Record<string, any>>(setup: (props: Readonly<Props>, expose: (exposed?: RawBindings) => void) => RenderFunction) {
   return defineComponent<Props, RawBindings>({
     inheritAttrs: false,
     name: setup.name,

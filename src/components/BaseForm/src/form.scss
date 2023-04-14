@@ -3,6 +3,16 @@
 .ml-form {
   display: flex;
   flex-wrap: wrap;
+
+  .el-form-item__label {
+    line-height: 16px;
+    align-items: center;
+    padding-left: 5px;
+    text-align: right;
+  }
+  &.el-form--label-left .el-form-item__label {
+    text-align: left;
+  }
   &.el-form--inline {
     .el-form-item {
       width: 25%;

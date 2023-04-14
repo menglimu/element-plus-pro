@@ -1,6 +1,27 @@
-.ml-table {
+.baseTable {
   // padding: 0 8px;
-  overflow: hidden;
+  // overflow: hidden;
+  .el-table {
+    --el-table-header-bg-color: rgb(186, 232, 231);
+  }
+  .tableSearch {
+    margin-bottom: 10px;
+  }
+  .tableOuter {
+    margin-bottom: 10px;
+    display: flex;
+    .tableTitle {
+      padding-right: 10px;
+      flex-shrink: 0;
+      line-height: 32px;
+    }
+    .outerBtnBox {
+      margin-left: auto;
+      .el-button {
+        min-width: 100px;
+      }
+    }
+  }
 
   .ml-table-empty {
     margin-top: 40px;
@@ -14,98 +35,15 @@
       margin: 0 auto 10px;
     }
   }
-
-  .outer-btn-box {
-    margin-bottom: 16px;
-  }
-
-  .el-table {
-    width: 100%;
-
-    .cell {
-      .td-text {
-        // @include text-overflow();
-        // overflow: hidden; //超出的文本隐藏
-        // text-overflow: ellipsis; //溢出用省略号显示
-        // white-space: nowrap; //溢出不换行
-        line-height: 20px;
-      }
-
-      .td-img-box {
-        display: flex;
-        align-items: center;
-      }
-
-      .td-img {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        margin-left: 4px;
-
-        &:first-child {
-          margin-left: 0;
-        }
-
-        .el-icon-circle-close {
-          color: #fff;
-        }
-      }
-
-      .success,
-      .error,
-      .warning,
-      .done,
-      .failed {
-        &::before {
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          margin: 0 4px 2px 0;
-          content: "";
-          border-radius: 50%;
-        }
-      }
-
-      .success::before {
-        background-color: #19cc96;
-      }
-
-      .error::before {
-        background-color: #ff5b63;
-      }
-
-      .warning::before {
-        background-color: #ff8f33;
-      }
-
-      .done::before {
-        background-color: #3786fd;
-      }
-
-      .failed::before {
-        background-color: #c0c0c0;
-      }
-    }
-
-    thead th {
-      position: relative; //loading层级问题
-      font-weight: 500;
-      color: #333;
-      background-color: #fafafa;
-    }
-  }
-
-  .el-table__empty-block {
-    width: 100% !important;
-  }
 }
 
 // 因为优先级的问题。放在外层来
-.ml-table-pagination {
+.tablePagination {
   padding: 0;
-  margin-top: 10px;
-  font-weight: normal;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 5px;
+  // background: #d9d9d9;
 
   &.is-background {
     .btn-next,
@@ -144,76 +82,39 @@
   }
 }
 
-.ml-table-search {
-  position: relative;
-  margin: 0 -15px;
-
-  .ml-form {
+.tableSearch {
+  display: flex;
+  overflow: hidden;
+  padding-top: 18px;
+  background: #fafafa;
+  .formBox {
     flex: 1;
   }
-
-  .ml-form-item-box {
+  .btnBox {
     flex-shrink: 0;
-  }
-
-  &.hide-more {
-    .ml-form {
-      flex-wrap: nowrap;
-      overflow: hidden;
-    }
-  }
-
-  .search-btn-box {
-    padding-right: 15px;
-    margin-left: auto;
+    margin: 0 20px;
     text-align: right;
-
-    .arrow {
-      padding-right: 10px;
-      padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    .more {
+      height: 32px;
+      margin-bottom: 18px;
+      display: block;
+      line-height: 32px;
+      .el-icon {
+        transform: rotate(90deg);
+      }
+      .fold {
+        transform: rotate(-90deg);
+      }
     }
-  }
-
-  > .search-btn-box {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-
-  &.search-label-top {
-    .search-btn-box {
-      margin-top: 22px;
-    }
-  }
-
-  &:not(.hide-more).aloneLineBtn {
-    .search-btn-box {
-      margin-top: 0;
+    .btns {
       margin-bottom: 18px;
     }
   }
 
-  @for $i from 1 to 5 {
-    &.hide-more.hide-index-#{$i} {
-      .ml-form-item-box:nth-child(#{$i}) {
-        visibility: hidden;
-      }
-    }
-
-    // .paper:nth-child(#{$i}) {
-    //   /**
-    //     有顺序之分
-    //     transform: translate() rotate() !== transform: rotate() translate()
-    //     */
-    //   transform: translate(-50%, -40%) rotate(#{$i}5deg);
-    // }
-  }
-
-  &.btn-in-form {
-    .ml-form {
-      .search-btn-box {
-        margin-left: 15px;
-      }
-    }
+  &.hide {
+    height: 100px;
   }
 }

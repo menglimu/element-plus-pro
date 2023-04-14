@@ -9,12 +9,12 @@
  *
  *
  */
-import { nextTick, onMounted, provide, ref, watchEffect } from "vue";
+import { nextTick, onMounted, provide, ref, toRaw, watch, watchEffect } from "vue";
 // import FormItem from "./formItem";
 import { cloneDeep } from "lodash";
 
 import "./form.scss";
-import { ElForm, FormInstance, FormProps } from "element-plus";
+import { ElForm, FormEmits, FormInstance, FormProps } from "element-plus";
 import FormItem, { BaseFormColumn, BaseFormItemExpose } from "./FormItem";
 import { UseModelEmits, UseModelProps, useModel } from "../hooks/useModel";
 import { emitFormValueKey, emitItemInitValueKey, formConfigKey, formValueKey } from "../keys";
@@ -30,6 +30,8 @@ export interface BaseFormConfig<D = AnyObj> extends UnReadonly<Partial<FormProps
   clearable?: boolean;
   /** 是否只读 */
   readonly?: boolean;
+  /** 每一项的默认宽度 */
+  width?: string;
 }
 
 export interface BaseFormProps<D = AnyObj> extends UseModelProps<D> {
@@ -49,6 +51,7 @@ const elformDefault = {
   clearable: true,
   labelWidth: "100px",
   labelSuffix: ":",
+  width: "25%",
 };
 
 export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
@@ -69,28 +72,33 @@ export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
     let elformProps = $ref<Partial<FormProps>>();
     // 初始化值
     watchEffect(() => {
+      console.log("config change");
       config_ = Object.assign({}, elformDefault, props.config);
-      const { clearable, readonly, columns, ...other } = config_;
+      const { clearable, readonly, width, columns, ...other } = config_;
       elformProps = other;
+    });
+    watchEffect(() => {
+      emitValue({ ...initValue, ...value_ });
+    });
+    watch([() => props.config.columns], () => {
+      console.log("xxx");
     });
 
     // 根据key设置表单的初始值
     function emitFormDefaultValue(value: any, prop: string) {
       prop && (initValue[prop] = value);
     }
-    watchEffect(() => {
-      emitValue({ ...initValue, ...value_ });
-    });
 
     provide(formValueKey, $$(value_!));
     provide(emitFormValueKey, emitFormValue);
     provide(emitItemInitValueKey, emitFormDefaultValue);
     provide(formConfigKey, $$(config_));
 
-    onMounted(() => {
-      // 重写form的 resetFields
-      expose({ reset, ...elForm.value!, resetFields: reset, reloadOptions });
-    });
+    // 重写form的 resetFields
+    const exposed = { reset, ...elForm.value!, resetFields: reset, reloadOptions };
+    expose(exposed);
+    onMounted(() => Object.assign(exposed, elForm.value, { resetFields: reset }));
+
     // reloadOptions 使用场景不多 先注释掉
     function reloadOptions(name: string) {
       refs?.[name]?.relaodOptions?.();

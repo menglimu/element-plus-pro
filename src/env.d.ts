@@ -11,6 +11,11 @@ interface AnyObj {
   [key: string]: any;
 }
 
+type EventEmits = {
+  // [key: `on${string}`]: (...args: any[]) => any;
+  [key: string]: (...args: any[]) => any;
+};
+
 /** 获取数组中的每一项对应的类型 */
 type InferArray<T> = T extends (infer U)[] ? U : never;
 

@@ -1,179 +1,198 @@
-import { ElTable } from "element-plus";
-import { Table } from "element-plus/es/components/table/src/table/defaults";
-import { BaseTableProps, ResponseData } from "types/table";
-import { onMounted, ref, UnwrapNestedRefs, VNode } from "vue";
-import useConfig from "./config";
-import useOuterBtn from "./outerBtn";
-import usePagination from "./pagination";
-// import useTable from "./table";
-import TableBox from "./table";
-
 /**
  * @Author: wenlin
  * @Description: 表格组件
  */
 
-export default functionComponent<BaseTableProps>(function BaseTable(props) {
-  let data = ref<AnyObj[]>([]);
-  let loading = $ref(false);
-  let searchInput = $ref({});
+import { ElMessage, ElMessageBox, ElTable, PaginationProps } from "element-plus";
+import { Ref, UnwrapNestedRefs, onMounted, reactive, ref, toRef, watchEffect } from "vue";
+import TablePagination from "../components/TablePagination";
+import { BaseTableOuterBtn, useOuterBtn } from "../components/TableButton";
+import TableSearch, { BaseTableSearchExpose, BaseTableSearchProps } from "../components/TableSearch";
+import "./table.scss";
+import TableContent, { BaseTableConfig } from "../components/TableContent";
+import { BaseFormExpose } from "@/components/BaseForm/src/Form";
 
-  // const { table, multipleSelection, renderTable } = useTable(props, data, refresh);
-  let { pageSize, currentPage, total, renderPagination } = $(usePagination(props, search));
-  const renderOuerBtn = useOuterBtn(props, data, [], refresh);
+export type FetchListFn = (type?: "" | "search" | "reset" | "init" | "refresh" | "size" | "current", data?: AnyObj) => Promise<void>;
+interface ResponseData<D = AnyObj> {
+  total: number;
+  content: D[];
+}
+interface TableParams {
+  pageSize?: number;
+  pageNum?: number;
+  // [P in keyof S]?: S[P]
+}
+export interface BaseTableProps<D = AnyObj, S = AnyObj> {
+  /** 表格头部搜索项 */
+  searchProps?: BaseTableSearchProps;
 
-  //       defaultOptions: null as MlTableDefaultOptions,
-  //       // 表格组件默认配置项
-  //       paginationConfigDefault: {
-  //         pageSizes: [10, 20, 30],
-  //         pageSize: 10,
-  //         background: true,
-  //         layout: "total, sizes, prev, pager, next, jumper",
-  //       }
-  //       configDefault: {
-  //         tableKey: "id",
-  //         selection: false,
-  //         reserveSelection: true,
-  //         initSearch: true,
-  //       }
-  //       TableDefault: {
-  //         "element-loading-text": "拼命加载中",
-  //         "element-loading-spinner": "el-icon-loading",
-  //         "element-loading-background": "rgba(0, 0, 0, 0.8)",
-  //       }
+  /** 搜索表单附加值，会被输入框中的值覆盖 */
+  params?: AnyObj;
+  /** 初始化的时候，是否直接请求数据，默认 true */
+  initSearch?: boolean;
+  /** 数据加载前的钩子函数，可处理请求参数，也可在api中的list方法中处理请求 */
+  beforeGetList?: (type: string, params: S & TableParams) => AnyObj;
+  /** 数据加载后的钩子函数 */
+  afterGetList?: (type: string, res: ResponseData<D>) => void;
+  /** 请求的接口列表 */
+  api?: {
+    /**
+     * 删除接口，evtType为mldelete时触发内部删除并使用该方法
+     * @param {String} ids id拼接的字符串
+     * @param {Array} data 要删除的数据列表
+     */
+    delete?: (ids: string, data?: D[]) => Promise<any>;
 
-  //       emptyWord: "暂无数据",
-  //       emptyImg,
-  //       elTable: null as ElTable,
-  //       mlForm: null,
+    /** 查询列表数据 */
+    list?: (data: S & TableParams) => Promise<ResponseData<D>>;
 
-  onMounted(() => {
-    // 初始化的时候，是否直接搜索数据
-    if (props.initSearch ?? true === true) {
-      search("init");
-    }
-    // elTable = $refs.table as ElTable;
-    // mlForm = ($refs as any).tableSearch?.$refs?.searchForm;
-    // $nextTick(() => (elTable = $refs.table))
-  });
+    /** 导入数据 */
+    // import?: (data: S & TableParams) => Promise<any>;
 
-  // 刷新表格数据
-  function refresh() {
-    search("refresh");
-  }
+    /** 导出数据 */
+    // export?: (data: S & TableParams) => Promise<any>;
+  };
+  /** 静态数据 */
+  dataSource?: D[];
 
-  // 重置查询条件并搜索
-  // @Provide()
-  async function onReset(data: AnyObj = {}) {
-    resetPageNum();
-    await search("reset", data || {});
-  }
-  // @Provide()
-  async function onSearch(data: AnyObj = {}) {
-    resetPageNum();
-    await search("searchBtn", data || {});
-  }
-  // 如果是由搜索/重置按钮触发的,重置分页相关参数
-  function resetPageNum() {
-    // pageSize = 10
-    currentPage = 1;
-  }
+  /** 表格的标题 */
+  title?: string;
+  /** 表格外按钮 */
+  outerBtn?: BaseTableOuterBtn<D>[];
+  /** 表格配置项 */
+  config: BaseTableConfig<D>;
 
-  // 刷新头部状态
-  // function forceUpdateTableHeader() {
-  //   table.value?.update?.()
-  // }
+  /** 分页相关配置项 */
+  paginationProps?: Partial<PaginationProps> | false;
+}
 
-  // 搜索
-  async function search(type = "", param: AnyObj = {}) {
-    if (!props.api?.list) {
-      return;
-    }
-    // expand-row-keys
-    loading = true;
-    data.value = [];
-    const pager = props.paginationConfig !== false ? { pageSize: pageSize, pageNum: currentPage } : {};
-    let params = {
-      ...pager,
-      ...props.params,
-      ...searchInput,
-      ...param,
-    };
+interface IExpose<D extends AnyObj = AnyObj, S extends AnyObj = AnyObj> {
+  fetchList: FetchListFn;
+  refresh: () => Promise<void>;
+  baseForm: Ref<BaseFormExpose | undefined>;
+  elTable: Ref<InstanceType<typeof ElTable> | undefined>;
+  searchData: Ref<S>;
+  selection: Ref<D[]>;
+  data: Ref<D[]>;
+}
+export type BaseTableExpose<D extends AnyObj = AnyObj, S extends AnyObj = AnyObj> = UnwrapNestedRefs<IExpose<D, S>>;
 
-    if (props.beforeGetList) {
-      params = props.beforeGetList(type, params) || params;
-    }
-    let res: ResponseData;
-    try {
-      res = await props.api.list(params);
-      total = Number(res.total) || 0;
-      data.value = res?.content || [];
-      if (data.value.length === 0 && currentPage > (Math.ceil(total / pageSize) || 1)) {
-        currentPage = 1;
-        search("errorPage-reset");
+export default FC<BaseTableProps, IExpose, EventEmits>({
+  name: "BaseTable",
+  props: ["searchProps", "params", "initSearch", "beforeGetList", "afterGetList", "api", "dataSource", "title", "outerBtn", "config", "paginationProps"],
+  setup(props, { expose }) {
+    const tableSearch = ref<BaseTableSearchExpose>();
+    const baseForm = ref<BaseFormExpose>();
+    const elTable = ref<InstanceType<typeof ElTable>>();
+    let searchData = $ref({});
+
+    let data = $ref<AnyObj[]>([]);
+    let loading = $ref(false);
+    let selection = $ref<AnyObj[]>([]);
+
+    const paginationProps = toRef(props, "paginationProps");
+    let { pageSize, currentPage, total, renderPagination } = $(TablePagination(paginationProps, fetchList));
+
+    const renderOuerBtn = useOuterBtn(props.outerBtn, $$(selection), del);
+
+    expose({
+      baseForm,
+      elTable,
+      searchData: $$(searchData),
+      selection: $$(selection),
+      data: $$(data),
+      refresh,
+      fetchList,
+    });
+    onMounted(() => {
+      // 初始化的时候，是否直接搜索数据
+      if (props.initSearch ?? true) {
+        fetchList("init");
       }
-    } catch (error) {
-      console.error(error);
-      res = error as any;
+      baseForm.value = tableSearch?.value?.baseForm;
+    });
+
+    // 获取选择的项
+    function handleSelectionChange(val: AnyObj[]) {
+      selection = val;
     }
-    // if (type === "sort") {
-    //   forceUpdateTableHeader();
-    // }
-    console.log(data);
 
-    loading = false;
-    props.afterGetList?.(type, res);
-  }
+    // 刷新表格数据
+    function refresh() {
+      return fetchList("refresh");
+    }
 
-  // // 搜索表单
-  // function  renderSearch() {
-  //   return $scopedSlots.search ? (
-  //     $scopedSlots.search({ search: onSearch, reset: onReset })
-  //   ) : searchConfig?.config?.columns?.length ? (
-  //     <TableSearch
-  //       ref="tableSearch"
-  //       framework={framework}
-  //       v-model={searchInput}
-  //       onSearch={onSearch}
-  //       onReset={onReset}
-  //       {...{ props: searchConfig }}
-  //     />
-  //   ) : null;
-  // }
+    // 搜索
+    async function fetchList(type: Parameters<FetchListFn>[0] = "", param: AnyObj = {}) {
+      if (!props.api?.list) return;
 
-  //   <!-- 分页 -->
-  // function  renderPagination() {
-  //   if (paginationConfig === false) {
-  //     return;
-  //   }
-  //   const { TagPagination } = tags;
-  //   return (
+      // 如果是由搜索/重置按钮触发的,重置分页相关参数
+      if (["search", "reset"].includes(type)) {
+        currentPage = 1;
+      }
 
-  //   );
-  // }
-  onMounted(() => {
-    // console.log(table.value);
-  });
-  let aaaa = $ref(1);
-  return () => (
-    <div
-      class="ml-table"
-      onClick={() => {
-        aaaa++;
-        // console.log(table.value);
-      }}
-    >
-      {aaaa}
-      {/* {renderSearch()} */}
-      {renderOuerBtn()}
-      {/* {$slots.default} */}
-      {/* {$scopedSlots.table ? $scopedSlots.table({ data: data, columns: config_.columns }) : renderTable(h)} */}
-      {/* {renderTable?.value} */}
-      <TableBox props={props} data={data} refresh={refresh} />
-      <ElTable>{console.log(2234353)}</ElTable>
-      {renderPagination()}
-    </div>
-  );
+      loading = true;
+      data = [];
+      const pager = props.paginationProps !== false ? { pageSize: pageSize, pageNum: currentPage } : {};
+      let params = {
+        ...pager,
+        ...props.params,
+        ...param,
+        ...searchData,
+      };
+
+      if (props.beforeGetList) {
+        params = props.beforeGetList(type, params) || params;
+      }
+      let res: ResponseData;
+      try {
+        res = await props.api.list(params);
+        total = Number(res.total) || 0;
+        data = res?.content || [];
+      } catch (error) {
+        console.error(error);
+        res = error as any;
+      }
+
+      loading = false;
+      props.afterGetList?.(type, res);
+    }
+
+    // 内部处理删除逻辑
+    async function del(rows: AnyObj[]) {
+      if (!rows?.length) {
+        ElMessage.warning("请选择要删除的内容");
+        return;
+      }
+      if (props.api?.delete) {
+        const rowKey = props.config.rowKey;
+        let ids: string = rows.map((_) => _[typeof rowKey === "function" ? rowKey(_) : rowKey!]).join(",");
+
+        try {
+          await ElMessageBox.confirm("此操作将永久删除该数据, 是否继续?");
+          await props.api?.delete(ids, rows);
+          refresh();
+          ElMessage.success("删除成功");
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
+    return () => (
+      <div class="baseTable">
+        {props.searchProps && <TableSearch v-model={searchData} ref={tableSearch} {...props.searchProps} search={fetchList} />}
+        {(props.title || props.outerBtn?.length) && (
+          <div class="tableOuter">
+            {props.title && <div class="tableTitle">{props.title}</div>}
+            {renderOuerBtn()}
+          </div>
+        )}
+        <TableContent elTable={elTable} v-loading={loading} onSelection-change={handleSelectionChange} data={data} config={props.config} />
+        {renderPagination()}
+      </div>
+    );
+  },
 });
 
 // import Vue from "vue";

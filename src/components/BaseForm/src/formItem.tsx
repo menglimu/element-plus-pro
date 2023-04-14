@@ -3,7 +3,7 @@
  * @Description: 表单的单项
  */
 
-import { VNode, ref, resolveComponent, h, cloneVNode, mergeProps, VNodeChild, inject, Ref, provide } from "vue";
+import { VNode, ref, resolveComponent, h, cloneVNode, mergeProps, VNodeChild, inject, Ref, provide, isReactive, isRef } from "vue";
 import { getFormColumn, getPrefix, getTrigger, getValByType } from "./utils";
 import { FormItemInstance, formItemProps, FormItemProps, FormItemRule } from "element-plus";
 import { useOptions, UseOptionsProps } from "../hooks/useOptions";
@@ -129,6 +129,19 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
       // 绑定value和input事件
       let props = mergeProps(baseProps, config.props || {});
 
+      //因为reactive会深层次处理内部的ref使用function来为ref赋值
+      if (configItem.props && "ref" in configItem.props) {
+        if (typeof configItem.props.ref !== "function") {
+          props.ref = (el: unknown) => {
+            if (isRef(configItem.props!.ref) && !isReactive(configItem.props)) {
+              configItem.props!.ref.value = el;
+            } else {
+              configItem.props!.ref = el;
+            }
+          };
+        }
+      }
+
       // 有prop属性名和render同时存在的时候。render作为输入元素
       if (config.prop && config.render) {
         vnode = config.render(rootValue[config.prop!], onElInput, rootValue);
@@ -161,7 +174,7 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
         <el-form-item
           v-show={!isHide}
           ref={elFormItem}
-          style={{ width: config.width }}
+          style={{ width: config.width || rootConfig.width }}
           class={[
             config.className,
             "ml-form-item",
