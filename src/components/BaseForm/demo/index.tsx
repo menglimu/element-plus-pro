@@ -8,6 +8,7 @@ import BaseForm from "..";
 import { BaseFormConfig, BaseFormExpose } from "../src/Form";
 import Children from "./Children";
 import { reactive, ref, shallowReactive, shallowRef } from "vue";
+import ChildrenMu from "./ChildrenMu";
 
 interface IProps {}
 
@@ -15,7 +16,7 @@ export default FC<IProps>({
   name: "BaseFormDemo",
   props: [],
   setup(props) {
-    let val = $ref({ b: [] });
+    let val = $ref({ b: [], sdgh: 5 });
     const aaa = ref([{ label: "1", value: "1" }]);
     const baseForm = ref<BaseFormExpose>();
     const formItem = ref();
@@ -67,7 +68,8 @@ export default FC<IProps>({
           //     : Promise.resolve([{ label: "1", value: "1" }]);
           // },
         },
-        { label: "自定义", prop: "aas", render: () => <Children ref={children} ref_for /> },
+        { label: "自定义输入", prop: "sdgh", render: () => <Children /> },
+        { label: "自定义多输入", prop: "aas", render: () => <ChildrenMu ref={children} /> },
       ],
     });
     function cbOption() {

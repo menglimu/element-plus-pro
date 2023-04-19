@@ -7,7 +7,7 @@ import { VNode, ref, resolveComponent, h, cloneVNode, mergeProps, VNodeChild, in
 import { getFormColumn, getPrefix, getTrigger, getValByType } from "./utils";
 import { FormItemInstance, formItemProps, FormItemProps, FormItemRule } from "element-plus";
 import { useOptions, UseOptionsProps } from "../hooks/useOptions";
-import { emitFormItemInitValueKey, emitFormValueKey, emitItemInitValueKey, formConfigKey, formItemConfigKey, formValueKey } from "../keys";
+import { emitFormValueKey, emitFormInitValueKey, formConfigKey, formValueKey } from "../keys";
 import { BaseFormType } from "./utils";
 
 /** 表单的具体项配置 */
@@ -62,7 +62,7 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
 
     const { rootConfig, rootValue } = $({ rootValue: inject(formValueKey)!, rootConfig: inject(formConfigKey)! });
     const onInput = inject(emitFormValueKey);
-    const emitInitValue = inject(emitItemInitValueKey);
+    const emitInitValue = inject(emitFormInitValueKey);
 
     const elFormItem = ref<FormItemInstance>();
 
@@ -96,11 +96,6 @@ export default FC<BaseFormItemProps, BaseFormItemExpose>({
     // 将当前初始值提交给form表单
     const defaultValue = getValByType(config);
     defaultValue !== undefined && emitInitValue?.(defaultValue, config.prop);
-
-    provide(emitFormItemInitValueKey, (value: any, prop?: string) => {
-      prop ? emitInitValue?.(value, prop) : emitInitValue?.(value, config.prop);
-    });
-    provide(formItemConfigKey, $$(config));
 
     // 下拉，单选，多选等的选择项
     const { options, relaodOptions } = useOptions($$(config));

@@ -17,7 +17,7 @@ import "./form.scss";
 import { ElForm, FormEmits, FormInstance, FormProps } from "element-plus";
 import FormItem, { BaseFormColumn, BaseFormItemExpose } from "./FormItem";
 import { UseModelEmits, UseModelProps, useModel } from "../hooks/useModel";
-import { emitFormValueKey, emitItemInitValueKey, formConfigKey, formValueKey } from "../keys";
+import { emitFormValueKey, emitFormInitValueKey, formConfigKey, formValueKey } from "../keys";
 
 // 将elform所有属性放在config中而不是直接在prop中。主要是为了方便监听elformProp中的项。防止触发太频繁
 // 其他方案，考虑通过toRefs将所有props进行转换
@@ -87,7 +87,7 @@ export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
 
     provide(formValueKey, $$(value_!));
     provide(emitFormValueKey, emitFormValue);
-    provide(emitItemInitValueKey, emitFormDefaultValue);
+    provide(emitFormInitValueKey, emitFormDefaultValue);
     provide(formConfigKey, $$(config_));
 
     // 重写form的 resetFields
