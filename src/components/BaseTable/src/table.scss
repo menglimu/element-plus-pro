@@ -22,21 +22,28 @@
       }
     }
   }
-
-  .ml-table-empty {
-    margin-top: 40px;
-    font-size: 14px;
-    color: #666;
-    text-align: center;
-
-    &-img {
-      display: block;
-      width: 160px;
-      margin: 0 auto 10px;
+  &.fullHeight {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .el-table {
+      flex: 1;
     }
   }
 }
 
+.ml-table-empty {
+  margin-top: 40px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+
+  &-img {
+    display: block;
+    width: 160px;
+    margin: 0 auto 10px;
+  }
+}
 // 因为优先级的问题。放在外层来
 .tablePagination {
   padding: 0;

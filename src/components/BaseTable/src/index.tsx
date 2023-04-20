@@ -26,10 +26,13 @@ export interface BaseTableProps<D = AnyObj, S = AnyObj> {
   /** 表格头部搜索项 */
   searchProps?: BaseTableSearchProps;
 
-  /** 搜索表单附加值，会被输入框中的值覆盖 */
-  params?: AnyObj;
+  /** 是否全屏表格，需父元素有高度 */
+  fullHeight?: boolean;
+
   /** 初始化的时候，是否直接请求数据，默认 true */
   initSearch?: boolean;
+  /** 搜索表单附加值，会被输入框中的值覆盖 */
+  params?: AnyObj;
   /** 数据加载前的钩子函数，可处理请求参数，也可在api中的list方法中处理请求 */
   beforeGetList?: (type: string, params: S & TableParams) => AnyObj;
   /** 数据加载后的钩子函数 */
@@ -79,7 +82,20 @@ export type BaseTableExpose<D extends AnyObj = AnyObj, S extends AnyObj = AnyObj
 
 export default FC<BaseTableProps, IExpose, EventEmits>({
   name: "BaseTable",
-  props: ["searchProps", "params", "initSearch", "beforeGetList", "afterGetList", "api", "dataSource", "title", "outerBtn", "config", "paginationProps"],
+  props: [
+    "searchProps",
+    "fullHeight",
+    "initSearch",
+    "params",
+    "beforeGetList",
+    "afterGetList",
+    "api",
+    "dataSource",
+    "title",
+    "outerBtn",
+    "config",
+    "paginationProps",
+  ],
   setup(props, { expose }) {
     const tableSearch = ref<BaseTableSearchExpose>();
     const baseForm = ref<BaseFormExpose>();
@@ -125,7 +141,10 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
     // 搜索
     async function fetchList(type: Parameters<FetchListFn>[0] = "", param: AnyObj = {}) {
       if (!props.api?.list) return;
-
+      if (props.dataSource) {
+        data = props.paginationProps !== false ? props.dataSource.slice(pageSize * (currentPage - 1), pageSize * currentPage) : props.dataSource;
+        return;
+      }
       // 如果是由搜索/重置按钮触发的,重置分页相关参数
       if (["search", "reset"].includes(type)) {
         currentPage = 1;
@@ -176,7 +195,7 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
     }
 
     return () => (
-      <div class="baseTable">
+      <div class={{ baseTable: true, fullHeight: props.fullHeight }}>
         {props.searchProps && <TableSearch v-model={searchData} ref={tableSearch} {...props.searchProps} search={fetchList} />}
         {(props.title || props.outerBtn?.length) && (
           <div class="tableOuter">
@@ -190,101 +209,3 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
     );
   },
 });
-
-// import Vue from "vue";
-// import "./table.scss";
-// import { CreateElement, PropType, VNode } from "vue/types/umd";
-// import {
-//   TableSearchProp,
-//   MlTableConfig,
-//   MlTableInnerBtn,
-//   MlTableOuterBtn,
-//   MlTableDefaultOptions,
-//   MlTableColumn,
-//   TableParams,
-// } from "types/table";
-// import Tags from "../../../utils/tags";
-// import emptyImg from "./../assets/no-data.png";
-// import { Pagination } from "element-ui";
-// import { ElTable } from "element-ui/types/table";
-// import { columnsHandler } from "./columnsContent";
-// import merge from "@/utils/merge";
-// import { cloneDeep } from "lodash";
-// import { getJudge } from "@/utils";
-// import TableSearch from "./table-search";
-// import { MlFormConfig } from "types/form";
-
-// export default Vue.extend({
-//   name: "MlTable",
-//   inheritAttrs: false,
-//   props: {
-//     /** 表格搜索配置项  */
-//     searchConfig: { type: Object as PropType<TableSearchProp>, required: false }
-//     /** 表格配置项 */
-//     config: { type: Object as PropType<MlTableConfig>, required: true }
-//     /** 搜索表单附加值，会被输入框中的值覆盖 */
-//     searchData: { type: Object as PropType<AnyObj>, default: () => ({}) }
-
-//     /** 表格内按钮 */
-//     innerBtn: { type: Array, default: (): MlTableInnerBtn[] => [] }
-
-//     /** 表格外按钮 */
-//     outerBtn: { type: Array, default: (): MlTableOuterBtn[] => [] }
-
-//     /** 分页配置 */
-//     paginationConfig: { type: Object as PropType<Pagination | false>, default: () => ({}) }
-
-//     /** 数据加载前的钩子函数 */
-//     beforeGetList: { type: Function as PropType<(type: string, params: any) => any> }
-
-//     /** 数据加载后的钩子函数 */
-//     afterGetList: { type: Function as PropType<(type: string, res: any) => void> }
-//   }
-//   data() {
-//     return {
-
-//     };
-//   }
-//   computed: {
-//     paginationConfig_(this: any) {
-//       const obj = Object.assign(paginationConfigDefault, paginationConfig || {});
-//       if (!pageSize) {
-//         pageSize = obj.pageSize;
-//       }
-//       return obj;
-//     }
-//     /** 表格内按钮 */
-//     innerBtn_(this: any): MlTableInnerBtn[] {
-//       return innerBtn;
-//     }
-//     /** 表格外按钮 */
-//     outerBtn_(this: any): MlTableOuterBtn[] {
-//       return outerBtn;
-//     }
-//   }
-//   created() {
-//     $watch("config", onConfigChange, { deep: true, immediate: true });
-//     defaultOptions = (this as any).MlTable;
-//     if (defaultOptions) {
-//       for (const key in defaultOptions) {
-//         if (typeof defaultOptions[key] === "object") {
-//           this[key] = merge(this[key], defaultOptions[key]);
-//         } else {
-//           this[key] = defaultOptions[key];
-//         }
-//       }
-//     }
-//     tags = new Tags(framework);
-//     if (searchConfig?.initialValue) {
-//       searchInput = merge(searchInput, searchConfig.initialValue);
-//     }
-//   }
-
-//   methods: {
-//   }
-//   render(h: CreateElement) {
-//     return (
-
-//     );
-//   }
-// });

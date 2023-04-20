@@ -14,6 +14,7 @@ export default FC<IProps>({
   setup(props) {
     const tableProps: BaseTableProps = reactive({
       title: "西山查询",
+      fullHeight: true,
 
       searchProps: {
         modelValue: { xx: "1356" },
