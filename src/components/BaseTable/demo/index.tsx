@@ -36,10 +36,10 @@ export default FC<IProps>({
       },
       api: {
         list(data) {
-          return new Promise((resolve) => {
-            setTimeout(() => resolve({ total: 3, content: [{ aa: 1, cc: { a: 16 }, aaa: 1123 }] }), 3000);
-          });
           console.log(data);
+          return new Promise((resolve) => {
+            setTimeout(() => resolve({ total: 30, content: [{ aa: 1, cc: { a: 16 }, aaa: 1123 }] }), 3000);
+          });
           return Promise.resolve({ total: 3, content: [{ aa: 1, cc: { a: 16 }, aaa: 1123 }] });
         },
       },
@@ -85,7 +85,7 @@ export default FC<IProps>({
       // tableProps.paginationProps.layout = "total";
       // tableProps.searchProps.modelValue.xx = 11123;
       console.log(baseTable.value?.selection, baseTable);
-      baseTable.value?.baseForm?.clearValidate();
+      baseTable.value?.tableSearch?.baseForm?.clearValidate();
     }
     return () => (
       <div>

@@ -22,9 +22,9 @@ interface TableParams {
   pageNum?: number;
   // [P in keyof S]?: S[P]
 }
-export interface BaseTableProps<D = AnyObj, S = AnyObj> {
+export interface BaseTableProps<D extends AnyObj = AnyObj, S extends AnyObj = AnyObj> {
   /** 表格头部搜索项 */
-  searchProps?: BaseTableSearchProps;
+  searchProps?: BaseTableSearchProps<D>;
 
   /** 是否全屏表格，需父元素有高度 */
   fullHeight?: boolean;
@@ -72,7 +72,8 @@ export interface BaseTableProps<D = AnyObj, S = AnyObj> {
 interface IExpose<D extends AnyObj = AnyObj, S extends AnyObj = AnyObj> {
   fetchList: FetchListFn;
   refresh: () => Promise<void>;
-  baseForm: Ref<BaseFormExpose | undefined>;
+  search: () => Promise<void>;
+  tableSearch: Ref<BaseTableSearchExpose | undefined>;
   elTable: Ref<InstanceType<typeof ElTable> | undefined>;
   searchData: Ref<S>;
   selection: Ref<D[]>;
@@ -112,20 +113,20 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
     const renderOuerBtn = useOuterBtn(props.outerBtn, $$(selection), del);
 
     expose({
-      baseForm,
       elTable,
+      tableSearch,
       searchData: $$(searchData),
       selection: $$(selection),
       data: $$(data),
       refresh,
+      search,
       fetchList,
     });
     onMounted(() => {
       // 初始化的时候，是否直接搜索数据
       if (props.initSearch ?? true) {
-        fetchList("init");
+        fetchList("init", tableSearch?.value?.value);
       }
-      baseForm.value = tableSearch?.value?.baseForm;
     });
 
     // 获取选择的项
@@ -138,6 +139,11 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
       return fetchList("refresh");
     }
 
+    // 搜索表格数据
+    function search() {
+      return fetchList("search", tableSearch?.value?.value);
+    }
+
     // 搜索
     async function fetchList(type: Parameters<FetchListFn>[0] = "", param: AnyObj = {}) {
       if (!props.api?.list) return;
@@ -148,6 +154,9 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
       // 如果是由搜索/重置按钮触发的,重置分页相关参数
       if (["search", "reset"].includes(type)) {
         currentPage = 1;
+      }
+      if (["search", "init"].includes(type)) {
+        searchData = param;
       }
 
       loading = true;
@@ -196,7 +205,7 @@ export default FC<BaseTableProps, IExpose, EventEmits>({
 
     return () => (
       <div class={{ baseTable: true, fullHeight: props.fullHeight }}>
-        {props.searchProps && <TableSearch v-model={searchData} ref={tableSearch} {...props.searchProps} search={fetchList} />}
+        {props.searchProps && <TableSearch ref={tableSearch} {...props.searchProps} search={fetchList} />}
         {(props.title || props.outerBtn?.length) && (
           <div class="tableOuter">
             {props.title && <div class="tableTitle">{props.title}</div>}
