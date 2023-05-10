@@ -193,7 +193,9 @@ function children(config: BaseFormColumn, options: Ref<AnyObj[]>) {
   if (["radio", "checkbox", "select"].includes(config.type!) && Array.isArray(options.value)) {
     // 下拉列表时，渲染下拉项
     if (config.type === "select") {
-      return options.value.map((option, index) => <el-option {...{ props: option }} key={index} label={option["label"]} value={option["value"]}></el-option>);
+      return options.value.map((option, index) => (
+        <el-option {...{ props: option }} key={index} label={option["label"]} value={option["value"]}></el-option>
+      ));
     } else if (config.type === "radio") {
       // 单选框、多选框
       return options.value.map((option, index) => (

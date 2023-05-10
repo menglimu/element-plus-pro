@@ -5,7 +5,7 @@
  * done 组件rootValue是否拷贝
  * fail 自定义组件内进行校验
  * done 自定义组件内进行初始化
- *
+ * TODO 支持aa.bb的prop
  *
  *
  */
@@ -54,7 +54,7 @@ const elformDefault = {
   width: "25%",
 };
 
-export default FC<BaseFormProps, BaseFormExpose, UseModelEmits>({
+export default FC<BaseFormProps, BaseFormExpose, UseModelEmits & FormEmits>({
   name: "BaseForm",
   inheritAttrs: false,
   props: ["config", "modelValue"],

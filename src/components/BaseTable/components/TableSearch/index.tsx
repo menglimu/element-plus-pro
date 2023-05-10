@@ -9,7 +9,6 @@ import BaseForm from "@/components/BaseForm";
 import { ElButton, ElLink } from "element-plus";
 import { cloneDeep } from "lodash";
 import { DArrowRight } from "@element-plus/icons-vue";
-import { UseModelEmits } from "@/components/BaseForm/hooks/useModel";
 
 export interface BaseTableSearchProps<D extends AnyObj = AnyObj> extends BaseFormProps<D> {
   // 点击搜索和重置后调用的方法

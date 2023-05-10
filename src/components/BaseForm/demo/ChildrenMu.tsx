@@ -32,15 +32,22 @@ export default FromFC<unknown, IProps>({
         // elItem.validateStatus = "错误";
       }
     }, 10000);
+    // done 多个根节点
     return () => (
-      <div>
+      <>
         <el-input modelValue={valKey ? formValue?.[valKey] : props.modelValue} onInput={(val: string) => emitFormValue?.(val, valKey)}></el-input>
-        <el-select modelValue={formValue?.[unitKey]} class="m-2" placeholder="Select" size="large" onChange={(val: string) => emitFormValue?.(val, unitKey)}>
+        <el-select
+          modelValue={formValue?.[unitKey]}
+          class="m-2"
+          placeholder="Select"
+          size="large"
+          onChange={(val: string) => emitFormValue?.(val, unitKey)}
+        >
           {["中国", "日本", "美国"].map((item) => (
             <el-option key={item} label={item} value={item} />
           ))}
         </el-select>
-      </div>
+      </>
     );
   },
 });

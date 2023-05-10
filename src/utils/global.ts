@@ -1,4 +1,5 @@
 import { UseModelEmits, UseModelProps, useModel } from "@/components/BaseForm/hooks/useModel";
+import { BaseFormConfig, BaseFormProps } from "@/components/BaseForm/src/Form";
 import { Component, DefineComponent, defineComponent, Directive, EmitsOptions, Ref, RenderFunction, SetupContext, UnwrapNestedRefs } from "vue";
 
 type UnionToIntersection<U> = (U extends any ? (a: (k: U) => void) => void : never) extends (a: infer I) => void ? I : never;
@@ -41,6 +42,7 @@ type FunctionComponent = <Props extends AnyObj = {}, RawBindings extends AnyObj 
 const functionComponent = (options: any) => defineComponent(options) as any;
 
 export interface FormFcProps<V = unknown> extends UseModelProps<V> {
+  size?: BaseFormConfig["size"];
   placeholder?: string;
   disabled?: boolean;
   clearable?: boolean;
@@ -61,7 +63,7 @@ type FormFunctionComponent = <V = unknown, Props extends AnyObj = {}, RawBinding
 ) => DefineComponent<Props & FormFcProps<V>, UnwrapNestedRefs<RawBindings>, {}, {}, {}, {}, {}, Emits>;
 
 const formFunctionComponent = (options: any) => {
-  const propsF = ["placeholder", "disabled", "clearable", "readonly", "modelValue"];
+  const propsF = ["size", "placeholder", "disabled", "clearable", "readonly", "modelValue"];
   const { props, setup, ...others } = options;
   return defineComponent({
     ...others,
